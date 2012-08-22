@@ -1,6 +1,6 @@
 <h1>
   あなたのFacebookから作った番組
-  <%= image_tag "ajaxindicator.gif", :style => "display:none;", :id => "loadingimg" %>
+  <%= image_tag "ajaxindicator.gif", style: "display:none;", id: "loadingimg" %>
 </h1>
 
 <p>
@@ -9,7 +9,7 @@
 
 <div class="row">
   <div class="span5">
-    <%= content_tag "audio", nil, {:src => "/voice?text=ようこそ#{@me.name}さん", :controls => true, :autoplay => true} %>
+    <%= content_tag "audio", nil, {src: "/voice?text=ようこそ#{@me.name}さん", controls: true, autoplay: true} %>
     <pre class="prettyprint" id="textdisplay">
     </pre>
   </div>

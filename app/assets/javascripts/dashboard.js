@@ -69,7 +69,7 @@ $(function () {
 
     loadData = function () {
         $('#' + LOADING_IMG_ID).show();
-        $.get('/topic', function (data) {
+        $.get('/story', function (data) {
             queue = data;
             $('#' + LOADING_IMG_ID).hide();
             exec(queue.shift());

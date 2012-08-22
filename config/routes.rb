@@ -4,5 +4,5 @@ Mychannel::Application.routes.draw do
   match 'dashboard' => 'dashboard#index'
 
   match 'voice' => 'voices#emit'
-  match 'topic' => 'topics#emit'
+  match 'story' => 'stories#emit'
 end
