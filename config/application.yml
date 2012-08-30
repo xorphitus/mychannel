@@ -1,0 +1,13 @@
+defaults: &defaults
+  fb:
+    app_id: 277546059018319
+    app_secret: be011e651b72d05be21249473ff94185
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
