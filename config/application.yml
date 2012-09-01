@@ -11,3 +11,6 @@ test:
 
 production:
   <<: *defaults
+  fb:
+    app_id: 115006475315066
+    app_secret: 1fdd6ffaedd7b2b658a5794444c53a4d
