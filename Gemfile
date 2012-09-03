@@ -18,7 +18,8 @@ end
 gem 'jquery-rails'
 gem 'twitter-bootstrap-rails'
 
-gem 'settingslogic'
+gem 'rails_config'
+
 gem 'romankana'
 
 gem 'fb_graph'
