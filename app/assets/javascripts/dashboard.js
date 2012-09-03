@@ -21,7 +21,7 @@ $(function () {
             targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer';
 
         // TODO use a function 'onYouTubePlayerReady' in stead of callback
-        swfobject.embedSWF(targetUserl, id, width, height, flashVersion, null, null, params, atts, function () {
+        swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts, function () {
             var player = $('object')[0],
                 originalVolume,
                 fadeoutTimer,
