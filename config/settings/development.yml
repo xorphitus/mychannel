@@ -1,0 +1,3 @@
+fb:
+  app_id: 277546059018319
+  app_secret: <%= ENV['FB_APP_SECRET'] %>
