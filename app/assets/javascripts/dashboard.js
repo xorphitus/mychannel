@@ -2,7 +2,7 @@
 $(function () {
     'use strict';
 
-    var MOVIE_FADEOUT_SEC = 10;
+    var VIDEO_FADEOUT_SEC = 10;
 
     var VIDEO_PLAYER_ID = 'videoplayer';
 
@@ -10,19 +10,18 @@ $(function () {
 
     var TEXT_DISPLAY_ID = 'textdisplay';
 
-    var setMovie = function (url, callback) {
+    var setVideo = function (url, callback) {
         var params = { allowScriptAccess: "always" },
             atts = { id: 'mychannerlVideoplayer' },
             videoId = "mYCttSFmeXA",
             id = 'videoplayerTarget',
             width = '425',
             height = '356',
-            flashVersion = '8';
-
-        url = 'http://www.youtube.com/v/' + videoId + '?enablejsapi=1&playerapiid=ytplayer';
+            flashVersion = '8',
+            targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer';
 
         // TODO use a function 'onYouTubePlayerReady' in stead of callback
-        swfobject.embedSWF(url, id, width, height, flashVersion, null, null, params, atts, function () {
+        swfobject.embedSWF(targetUserl, id, width, height, flashVersion, null, null, params, atts, function () {
             var player = $('object')[0],
                 originalVolume,
                 fadeoutTimer,
@@ -37,7 +36,7 @@ $(function () {
                         // face out
                         fadeoutTimer = setInterval(function () {
                             var volume;
-                            if (player.getCurrentTime() > MOVIE_FADEOUT_SEC) {
+                            if (player.getCurrentTime() > VIDEO_FADEOUT_SEC) {
                                 volume = player.getVolume();
                                 originalVolume = volume;
                                 if (volume > 10) {
@@ -74,9 +73,9 @@ $(function () {
                 $(this).unbind('ended');
                 exec(queue.shift());
             });
-        } else if (target.movie) {
+        } else if (target.video) {
             $('#' + VIDEO_PLAYER_ID).slideDown();
-            setMovie(target.movie[0], function () {
+            setVideo(target.video[0].url, function () {
                 $('#' + VIDEO_PLAYER_ID).slideUp();
                 exec(queue.shift());
             });
@@ -103,6 +102,6 @@ var d = [
         text: '読み上げます',
         link: [{url: 'http://hoge.com', title: 'タイトル'}],
         image: [{url: 'http://hoge.com', title: 'タイトル'}],
-        movie: [{url: 'http://hoge.com', title: 'タイトル'}]
+        video: [{url: 'http://hoge.com', title: 'タイトル'}]
     }
 ];

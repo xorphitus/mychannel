@@ -8,7 +8,7 @@ class VoicesController < ApplicationController
     text = params[:text].gsub(/\s+/, ',').gsub(/[a-zA-Z]+/) {|m| m.to_katakana}
     if text.length > 100 then
       # TODO できるだけ最後の句読点で切る
-      text = text[0, 99] + '…'
+      text = text[0, 97] + '以下略'
     end
 
     voice = get_voice(text)

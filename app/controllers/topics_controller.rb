@@ -11,20 +11,26 @@ class TopicsController < ApplicationController
 
     if r == 1 then
       # get latest post on the wall
-      target = me.home.find do |item|
-        !item.raw_attributes['message'].nil?
-      end
-      post = target.raw_attributes
-      text = post['from']['name'] + "さんからのポストです。\n" + post['message']
+      targets = me.home.select {|item| !item.message.nil?}
+      post = targets[rand targets.length]
+      text = post.from().name + "さんからのポストです。\n" + post.message
 
       ret.push({'text' => text})
     else
       # get favorite music
+      music_list = me.music
+      if music_list.length == 0 then
+        text = '音楽はあまりお好みではないですか?'
+        return ret.push({'text' => text})
+      end
+
       text = 'では、あなたのお気に入り、かもしれない一曲をどうぞ'
       ret.push({'text' => text})
 
-      # TODO https://github.com/grosser/youtube_search
-      ret.push({'movie' => text})
+      keyword = music_list[rand music_list.length].name
+      video_obj = YoutubeSearch.search(keyword).first
+      video = {'video' => [{'url' => 'http://youtube.com/v/' + video_obj['video_id'], 'name' => video_obj['name']}]}
+      ret.push(video)
     end
 
     # TODO get news
