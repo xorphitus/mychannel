@@ -1,3 +1,6 @@
 fb:
   app_id: 115006475315066
   app_secret: <%= ENV['FB_APP_SECRET'] %>
+
+yahoo:
+  app_id: 'GEOgaD2xg65j1Jj3wqxPj9fouyxwcrib4hJbXYXY9SCZZ4jl1OQHiLTXjw4kFk.bNoli.A--'

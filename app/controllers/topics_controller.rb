@@ -16,6 +16,15 @@ class TopicsController < ApplicationController
       text = post.from().name + "さんからのポストです。\n" + post.message
 
       ret.push({'text' => text})
+
+      YaCan.appid = Settings.yahoo.app_id
+      k = YaCan::Keyphrase.extract post.message
+      if k.phrases.length > 0 then
+        keyphrase = k.phrases[0]
+        ret.push({'text' => keyphrase + 'といえば'})
+        rss = SimpleRSS.parse open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode keyphrase}&lr&output=atom&num=5&hl=ja")
+        ret.push({'text' => rss.entries.first.title})
+      end
     else
       # get favorite music
       music_list = me.music
@@ -32,10 +41,6 @@ class TopicsController < ApplicationController
       video = {'video' => [{'url' => 'http://youtube.com/v/' + video_obj['video_id'], 'name' => video_obj['name']}]}
       ret.push(video)
     end
-
-    # TODO get news
-    # http://billboardtop100.net/2011/09/google-news-rss-feed-api.html
-    # http://simple-rss.rubyforge.org/
 
     render :json => ret
   end
