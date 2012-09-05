@@ -69,7 +69,7 @@ $(function () {
         }
         if (target.text) {
             $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast');
-            $('audio:first').attr('src', '/voice?text=' + target.text).bind('ended', function () {
+            $('audio:first').attr('src', '/voice?text=' + encodeURI(target.text)).bind('ended', function () {
                 $(this).unbind('ended');
                 exec(queue.shift());
             });
