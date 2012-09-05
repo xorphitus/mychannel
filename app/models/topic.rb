@@ -72,6 +72,8 @@ module TopicGenerator
         end
       end
     end
+
+    return ret
   end
 
   # お気に入りと思しき音楽を取得
@@ -88,10 +90,11 @@ module TopicGenerator
     ret.push({'text' => text})
 
     keyword = music_list.rand.name
-    video_obj = YoutubeSearch.search(keyword).first
+    video_obj = YoutubeSearch.search(keyword).rand
     video = {'video' => [{'url' => 'http://youtube.com/v/' + video_obj['video_id'], 'name' => video_obj['name']}]}
     ret.push(video)
   end
+
 end
 
 # TODO この辺の実装がモヤっとしてる. もっとカッコいいのがありそう
