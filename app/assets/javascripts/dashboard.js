@@ -1,63 +1,44 @@
-/*global $, swfobject */
+/*global setInterval, clearInterval, document, $, swfobject */
+
+var video = {};
+video.ID = 'videoplayer';
+video.PLAYER_ID = 'mychannerlVideoplayer';
+video.set = function (url, callback) {
+    'use strict';
+    var params = { allowScriptAccess: "always" },
+        atts = { id: video.PLAYER_ID },
+        id = 'videoplayerTarget',
+        width = '425',
+        height = '356',
+        flashVersion = '8',
+        targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer';
+
+    video.onFinish = callback;
+    swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts);
+};
+var onVideoPlayerStateChange = function (state) {
+    'use strict';
+    if (state === 0) {
+        video.onFinish();
+    }
+};
+var onYouTubePlayerReady = function (id) {
+    'use strict';
+    var player = document.getElementById(video.PLAYER_ID);
+    player.addEventListener('onStateChange', 'onVideoPlayerStateChange');
+    player.playVideo();
+};
+
 $(function () {
     'use strict';
 
-    var VIDEO_FADEOUT_SEC = 10;
+    var LOADING_IMG_ID = 'loadingimg',
+        TEXT_DISPLAY_ID = 'textdisplay',
+        queue = [],
+        exec,
+        loadData;
 
-    var VIDEO_PLAYER_ID = 'videoplayer';
-
-    var LOADING_IMG_ID = 'loadingimg';
-
-    var TEXT_DISPLAY_ID = 'textdisplay';
-
-    var setVideo = function (url, callback) {
-        var params = { allowScriptAccess: "always" },
-            atts = { id: 'mychannerlVideoplayer' },
-            videoId = "mYCttSFmeXA",
-            id = 'videoplayerTarget',
-            width = '425',
-            height = '356',
-            flashVersion = '8',
-            targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer';
-
-        // TODO use a function 'onYouTubePlayerReady' in stead of callback
-        swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts, function () {
-            var player = $('object')[0],
-                originalVolume,
-                fadeoutTimer,
-                readyTimer = setInterval(function () {
-                    if (player.playVideo) {
-                        player.playVideo();
-                        if (!isNaN(originalVolume)) {
-                            player.setVolume(originalVolume);
-                        }
-                        clearInterval(readyTimer);
-
-                        // face out
-                        fadeoutTimer = setInterval(function () {
-                            var volume;
-                            if (player.getCurrentTime() > VIDEO_FADEOUT_SEC) {
-                                volume = player.getVolume();
-                                originalVolume = volume;
-                                if (volume > 10) {
-                                    player.setVolume(volume * 0.7);
-                                } else {
-                                    clearInterval(fadeoutTimer);
-                                    player.stopVideo();
-                                    callback();
-                                }
-                            }
-                        }, 1000);
-                    }
-            }, 10);
-        });
-    };
-
-    //----------------------
-
-    var queue = [];
-
-    var exec = function (t) {
+    exec = function (t) {
         var target = t;
         if (!target) {
             if (queue && queue.length > 0) {
@@ -74,9 +55,9 @@ $(function () {
                 exec(queue.shift());
             });
         } else if (target.video) {
-            $('#' + VIDEO_PLAYER_ID).slideDown();
-            setVideo(target.video[0].url, function () {
-                $('#' + VIDEO_PLAYER_ID).slideUp();
+            $('#' + video.ID).slideDown();
+            video.set(target.video[0].url, function () {
+                $('#' + video.ID).slideUp();
                 exec(queue.shift());
             });
         } else {
@@ -84,7 +65,7 @@ $(function () {
         }
     };
 
-    var loadData = function () {
+    loadData = function () {
         $('#' + LOADING_IMG_ID).show();
         $.get('/topic', function (data) {
             queue = data;
