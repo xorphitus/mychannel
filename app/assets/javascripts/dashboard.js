@@ -96,12 +96,3 @@ $(function () {
     loadData();
 
 });
-
-var d = [
-    {
-        text: '読み上げます',
-        link: [{url: 'http://hoge.com', title: 'タイトル'}],
-        image: [{url: 'http://hoge.com', title: 'タイトル'}],
-        video: [{url: 'http://hoge.com', title: 'タイトル'}]
-    }
-];

@@ -98,6 +98,15 @@ module TopicGenerator
 end
 
 # TODO この辺の実装がモヤっとしてる. もっとカッコいいのがありそう
+#
+# とりあえず下記フォーマットのJSON (に変換可能な) オブジェクトを返す仕様
+# {
+#   text: '読み上げます',
+#   link: [{url: 'http://hoge.com', title: 'タイトル'}],
+#   image: [{url: 'http://hoge.com', title: 'タイトル'}],
+#   video: [{url: 'http://hoge.com', title: 'タイトル'}]
+# }
+#
 class Topic
   extend TopicGenerator
 end
