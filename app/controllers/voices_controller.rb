@@ -18,8 +18,7 @@ class VoicesController < ApplicationController
   # TODO アクセシビリティを下げる？
   def get_voice text
     begin
-      encoded = URI.encode text
-      uri = URI.parse "http://translate.google.co.jp/translate_tts?tl=ja&ie=utf-8&q=#{encoded}"
+      uri = URI.parse "http://translate.google.co.jp/translate_tts?tl=ja&ie=utf-8&q=#{URI.encode text}"
     rescue URI::InvalidURIError
       return get_voice_on_fail text
     end
