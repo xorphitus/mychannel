@@ -46,8 +46,8 @@ module TopicGenerator
     return ret
   end
 
-  # 自分の投稿 (ランダム) とそこに含まれるキーワードから想起されるワードを取得
-  def get_mypost_and_relatedword me
+  # 自分の投稿 (ランダム) とそこへのリアクション
+  def get_selfpost_and_reactions me
     targets = me.feed.select {|item| !item.message.nil?}
     if targets.empty? then
       return [({'text' => '最近はFacebookへの投稿をしていないようですね'})]
@@ -58,6 +58,26 @@ module TopicGenerator
     ret.push({'text' => '先日のあなたの投稿です'})
     message = post.message
     ret.push({'text' => message})
+
+    unless post.comments.empty? then
+      # TODO nameではなくidでrejectしたいけどidが取得できない?!
+      comment_data = post.comments.reject {|item| item.from.name == me.name}
+      unless comment_data.empty? then
+        comment = comment_data.rand
+        ret.push({'text' => comment.from.name + 'さんからのコメントです'})
+        ret.push({'text' => comment.message})
+      end
+    end
+
+    unless post.likes.empty? then
+      # TODO nameではなくidでrejectしたいけどidが取得できない?!
+      like_data = post.likes.reject {|item| item.name == me.name}
+      if like_data.length == 1 then
+        ret.push({'text' => like_data.first.name + 'さんがイイネと言っています'})
+      elsif like_data.length > 1 then
+        ret.push({'text' => like_data.rand.name + "さん、ほか#{like_data.length - 1}人が「いいね」と言っています"})
+      end
+    end
 
     # TODO ここは友達のリプライを取得して感情APIを叩くようにする
     YaCan.appid = Settings.yahoo.app_id
