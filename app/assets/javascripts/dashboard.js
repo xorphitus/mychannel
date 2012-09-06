@@ -1,6 +1,8 @@
 /*global setInterval, clearInterval, document, $, swfobject */
 
-var video = {};
+var video = {},
+    onYouTubePlayerReady;
+
 video.ID = 'videoplayer';
 video.PLAYER_ID = 'mychannerlVideoplayer';
 video.set = function (url, callback) {
@@ -16,16 +18,16 @@ video.set = function (url, callback) {
     video.onFinish = callback;
     swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts);
 };
-var onVideoPlayerStateChange = function (state) {
+video.onPlayerStateChange = function (state) {
     'use strict';
     if (state === 0) {
         video.onFinish();
     }
 };
-var onYouTubePlayerReady = function (id) {
+onYouTubePlayerReady = function (id) {
     'use strict';
     var player = document.getElementById(video.PLAYER_ID);
-    player.addEventListener('onStateChange', 'onVideoPlayerStateChange');
+    player.addEventListener('onStateChange', 'video.onPlayerStateChange');
     player.playVideo();
 };
 

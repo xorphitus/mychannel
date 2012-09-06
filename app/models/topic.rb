@@ -13,13 +13,6 @@ class Array
   end
 end
 
-module Utils
-  def extract_keyphrases text
-    YaCan.appid = Settings.yahoo.app_id
-    YaCan::Keyphrase.extract post.message
-  end
-end
-
 # このモジュールのメソッドがランダムで呼ばれる
 # トピックを増やしたければ任意の箇所でこのモジュールにメソッドを追加すればよい
 module TopicGenerator
@@ -36,7 +29,8 @@ module TopicGenerator
 
     ret.push({'text' => text})
 
-    k = Utils::extract_keyphrases post.message
+    YaCan.appid = Settings.yahoo.app_id
+    k = YaCan::Keyphrase.extract post.message
     unless k.phrases.empty? then
       keyphrase = k.phrases[0]
       ret.push({'text' => keyphrase + 'といえば'})
@@ -66,7 +60,8 @@ module TopicGenerator
     ret.push({'text' => message})
 
     # TODO ここは友達のリプライを取得して感情APIを叩くようにする
-    k = Utils::extract_keyphrases message
+    YaCan.appid = Settings.yahoo.app_id
+    k = YaCan::Keyphrase.extract post.message
     unless k.phrases.empty? then
       keyphrase = k.phrases[0]
       ret.push({'text' => keyphrase + 'といえば'})
