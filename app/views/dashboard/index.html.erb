@@ -1,18 +1,20 @@
 <h1>
-  俺の音を聴けぇー！！
+  あなたのFacebookから作った番組
   <%= image_tag "ajaxindicator.gif", :style => "display:none;", :id => "loadingimg" %>
 </h1>
 
+<p>
+  このページを開いて置いておくだけ！ラジオが勝手に放送されます
+</p>
+
 <div class="row">
   <div class="span5">
-    <h3>音声読み上げしちゃうよ</h3>
     <%= content_tag "audio", nil, {:src => "/voice?text=ようこそ#{@me.name}さん", :controls => true, :autoplay => true} %>
     <pre class="prettyprint" id="textdisplay">
     </pre>
   </div>
 
   <div id="videoplayer" style="display:none;" class="span5">
-    <h3>Youtube再生しちゃうよ</h3>
     <div id="videoplayerTarget">
       Flash player 8+ と JavaScriptの有効化が必要でございますよ
     </div>
