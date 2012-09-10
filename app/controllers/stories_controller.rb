@@ -3,8 +3,6 @@ class StoriesController < ApplicationController
   include Authentication
 
   def emit
-    # TODO これが重そうなので5分キャッシュとかしよう
-    me = FbGraph::User.me(@access_token).fetch
-    render json: Story.get(me)
+    render json: Story.get(get_fb_me)
   end
 end

@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  channel: 
+  name: MyString
+  target: MyString
+  target_text: MyText
+  order: 1
+
+two:
+  channel: 
+  name: MyString
+  target: MyString
+  target_text: MyText
+  order: 1

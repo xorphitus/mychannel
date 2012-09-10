@@ -1,4 +1,9 @@
 Mychannel::Application.routes.draw do
+  scope "edit" do
+    resources :topics
+    resources :channels
+  end
+
   root :to => 'login#index'
 
   match 'dashboard' => 'dashboard#index'

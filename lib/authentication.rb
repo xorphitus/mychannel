@@ -1,3 +1,4 @@
+# -*- coding: undecided -*-
 module Authentication
 
   class UnauthorizedError < StandardError; end
@@ -16,4 +17,8 @@ module Authentication
     end
   end
 
+  def get_fb_me
+    # TODO これが重そうなので5分キャッシュとかしよう
+    FbGraphExtension::User.me(@access_token).fetch
+  end
 end

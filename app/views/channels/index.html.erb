@@ -1,0 +1,36 @@
+<h1>設定</h1>
+
+<%= form_for(@user) do |f| %>
+<label>
+  <%= f.text_field :name %>
+  ラジオネーム
+</label>
+<%= f.submit "ラジオネームを保存する",  class: "btn" %>
+<% end %>
+
+<% unless @user.nil? %>
+<%= link_to "チャンネルを作る", new_channel_path, class: "btn btn-primary" %>
+<% end %>
+
+<% unless @channels.nil? %>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Publish flag</th>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+  <% @channels.each do |channel| %>
+  <tr>
+    <td><%= channel.name %></td>
+    <td><%= channel.publish_flag %></td>
+    <td><%= channel.description %></td>
+    <td><%= link_to "編集", edit_channel_path(channel) %></td>
+    <td><%= link_to "削除", channel, method: :delete, data: { confirm: "本当に削除しますか？" } %></td>
+  </tr>
+  <% end %>
+</table>
+<% end %>
