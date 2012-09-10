@@ -1,7 +1,8 @@
 Mychannel::Application.routes.draw do
   scope "edit" do
-    resources :topics
+    resources :users, only: [:create, :update]
     resources :channels
+    resources :topics
   end
 
   root :to => 'login#index'
