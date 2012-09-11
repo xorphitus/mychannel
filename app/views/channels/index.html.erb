@@ -1,6 +1,22 @@
 <h1>設定</h1>
 
-<%= form_for(@user, url: {controller: :users, action: (@user.name.nil? ? "create" : "update")}, html: {class: "form-inline"}) do |f| %>
+<% unless notice.nil? %>
+<div class="alert alert-success">
+  <%= notice %>
+</div>
+<% end %>
+
+<% unless alert.nil? %>
+<div class="alert alert-error">
+  <ul class="unstyled">
+    <% alert.full_messages.each do |msg| %>
+    <li><%= msg %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+
+<%= form_for(@user, url: {controller: :users, action: (@user.name.nil? ? "create" : "update"), id: @user.id}, html: {class: "form-inline"}) do |f| %>
 <label>
   ラジオネーム
   <%= f.text_field :name, placeholder: "名前を入れて下さい" %>
