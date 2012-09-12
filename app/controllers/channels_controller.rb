@@ -8,7 +8,7 @@ class ChannelsController < ApplicationController
     if @user.nil?
       @user = User.new
     else
-      @channels = Channel.find_by_user_id(@user.id)
+      @channels = @user.channels
     end
 
     respond_to do |format|
@@ -21,6 +21,7 @@ class ChannelsController < ApplicationController
   # GET /channels/1.json
   def show
     @channel = Channel.find(params[:id])
+    @channel.topics.sort! { |a, b| a.order < b.order }
 
     respond_to do |format|
       format.html # show.html.erb
@@ -47,7 +48,9 @@ class ChannelsController < ApplicationController
   # POST /channels
   # POST /channels.json
   def create
+    user = User.find_by_fb_id(get_fb_me.user_id)
     @channel = Channel.new(params[:channel])
+    @channel.user_id = user.id
 
     respond_to do |format|
       if @channel.save

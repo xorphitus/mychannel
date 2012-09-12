@@ -1,9 +1,7 @@
 <%= form_for(@channel) do |f| %>
   <% if @channel.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@channel.errors.count, "error") %> prohibited this channel from being saved:</h2>
-
-      <ul>
+    <div class="alert alert-error">
+      <ul class="unstyled">
       <% @channel.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>
       <% end %>
@@ -12,22 +10,18 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :user %><br />
-    <%= f.text_field :user %>
+    <label>
+      番組名
+      <%= f.text_field :name %>
+    </label>
   </div>
   <div class="field">
-    <%= f.label :name %><br />
-    <%= f.text_field :name %>
-  </div>
-  <div class="field">
-    <%= f.label :publish_flag %><br />
-    <%= f.check_box :publish_flag %>
-  </div>
-  <div class="field">
-    <%= f.label :description %><br />
-    <%= f.text_area :description %>
+    <label>
+      番組の説明
+      <%= f.text_area :description, rows: 3 %>
+    </label>
   </div>
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit "保存", class: "btn" %>
   </div>
 <% end %>

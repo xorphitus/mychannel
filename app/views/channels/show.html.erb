@@ -1,25 +1,41 @@
-<p id="notice"><%= notice %></p>
+<% unless notice.nil? %>
+<div id="notice" class="alert alert-success">
+  <%= notice %>
+</div>
+<% end %>
 
-<p>
-  <b>User:</b>
-  <%= @channel.user %>
-</p>
-
-<p>
-  <b>Name:</b>
+<h2>
   <%= @channel.name %>
-</p>
+</h2>
 
-<p>
-  <b>Publish flag:</b>
-  <%= @channel.publish_flag %>
-</p>
-
-<p>
-  <b>Description:</b>
+<div class="well">
   <%= @channel.description %>
-</p>
+</div>
 
+<%= link_to "番組設定を変更する", edit_channel_path(@channel), class: "btn" %>
+<%= link_to "戻る", channels_path, class: "btn" %>
 
-<%= link_to 'Edit', edit_channel_path(@channel) %> |
-<%= link_to 'Back', channels_path %>
+<br />
+<br />
+
+<%= link_to "新しい話題を作る", new_topic_path, class: "btn btn-primary" %>
+
+<% if @channel.topics.any?  %>
+<table>
+  <tr>
+    <th>話題の名前</th>
+    <th>お題</th>
+    <th>編集</th>
+    <th>削除</th>
+  </tr>
+
+  <% @channel.topics.each do |topic| %>
+  <tr>
+    <td><%= topic.name %></td>
+    <td><%= topic.target %></td>
+    <td><%= link_to "編集", edit_topic_path(topic) %></td>
+    <td><%= link_to "削除", topic, method: :delete, data: { confirm: "本当に削除しますか？" } %></td>
+  </tr>
+  <% end %>
+</table>
+<% end %>
