@@ -133,6 +133,64 @@ end
 class Story
   extend StoryGenerator
 end
+
 def Story.get me
-  self.send(StoryGenerator.public_instance_methods.rand, me)
+  # TODO fix the line below
+  #channels = Channel.find :all, include: :user, conditions: ["user.fb_id = ?", me.user_id]
+  channels = Channel.find(:all)
+  if channels.nil? then
+    return self.send(StoryGenerator.public_instance_methods.rand, me)
+  end
+  # TODO USER INNER JOIN
+  #topics = Topic.find_by_channel_id :all, channels.first.id
+  #tracs = Trac.find_by_topic_id :all, topics.rand.id
+  tracs = Trac.find :all
+  if tracs.empty? then
+    return self.send(StoryGenerator.public_instance_methods.rand, me)
+  end
+
+  targets = me.home.select {|item| !item.message.nil?}
+  if targets.empty? then
+    return [({'text' => '最近はお友達のコメントもご無沙汰ですね'})]
+  end
+
+  ret = []
+  post = targets.rand
+
+  val = nil
+  tracs.each do |trac|
+    trac_target = trac.target
+    unless trac_target == "prev" then
+      val = post.send trac_target.to_sym
+    end
+    case trac.action
+    when "keyword" then
+      YaCan.appid = Settings.yahoo.app_id
+      val = YaCan::Keyphrase.extract(val).phrases.rand
+    when "relation" then
+      server = XMLRPC::Client.new("d.hatena.ne.jp", "/xmlrpc")
+      result = server.call("hatena.getSimilarWord", {
+                             "wordlist" => [keyphrase]
+                           })
+      words = result['wordlist'].map {|v| v['word'] }
+      if words.empty? then
+        ret.push({'text' => '特に何も思い浮かびませんね'})
+        break
+      end
+      val = words.rand
+    when "news" then
+      rss = SimpleRSS.parse open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode val}&lr&output=atom&num=5&hl=ja")
+      if rss.entries.first.nil? then
+        ret.push({'text' => '関連ニュースはないみたいです'})
+        break
+      end
+      val = rss.entries.first.title
+    when "youtube" then
+      video_obj = YoutubeSearch.search(val).rand
+      video = {'video' => [{'url' => 'http://youtube.com/v/' + video_obj['video_id'], 'name' => video_obj['name']}]}
+      break ret.push video
+    end
+    ret.push({'text' => trac.pre_content + val + trac.post_content})
+  end
+  return ret
 end
