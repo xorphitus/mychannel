@@ -15,6 +15,7 @@ end
 
 # このモジュールのメソッドがランダムで呼ばれる
 # トピックを増やしたければ任意の箇所でこのモジュールにメソッドを追加すればよい
+# DEPRECATED: DB対応したことによって意味を失った
 module StoryGenerator
   # ウォールの内容 (ランダム) とそこに含まれるキーワードに関連したニュースを取得
   def get_wall_and_news me
@@ -120,18 +121,14 @@ module StoryGenerator
 
 end
 
-# TODO この辺の実装がモヤっとしてる. もっとカッコいいのがありそう
-#
-# とりあえず下記フォーマットのJSON (に変換可能な) オブジェクトを返す仕様
-# {
-#   text: '読み上げます',
-#   link: [{url: 'http://hoge.com', title: 'タイトル'}],
-#   image: [{url: 'http://hoge.com', title: 'タイトル'}],
-#   video: [{url: 'http://hoge.com', title: 'タイトル'}]
-# }
-#
+# View層のラジオプレイヤーに読ませるJSONデータを生成する
 class Story
   extend StoryGenerator
+end
+
+def Story.get_default me
+  # TODO ダミーのTopic, Tracのモデルを使うよう変更する
+  self.send(StoryGenerator.public_instance_methods.rand, me)
 end
 
 def Story.get me
@@ -139,58 +136,81 @@ def Story.get me
   #channels = Channel.find :all, include: :user, conditions: ["user.fb_id = ?", me.user_id]
   channels = Channel.find(:all)
   if channels.nil? then
-    return self.send(StoryGenerator.public_instance_methods.rand, me)
+    return Story.get_default me
   end
   # TODO USER INNER JOIN
-  #topics = Topic.find_by_channel_id :all, channels.first.id
-  #tracs = Trac.find_by_topic_id :all, topics.rand.id
-  tracs = Trac.find :all
+  topics = channels.rand.topics
+  if topics.nil? then
+    return Story.get_default me
+  end
+  topic = topics.rand
+  tracs = topic.tracs
   if tracs.empty? then
-    return self.send(StoryGenerator.public_instance_methods.rand, me)
+    return Story.get_default me
   end
 
-  targets = me.home.select {|item| !item.message.nil?}
-  if targets.empty? then
-    return [({'text' => '最近はお友達のコメントもご無沙汰ですね'})]
+  targets = me.send(topic.target.to_sym).select {|item| !item.message.nil?}
+  if targets.nil? then
+    return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
   end
 
   ret = []
-  post = targets.rand
+  target = targets.rand
 
   val = nil
+  trac_reader = TracReader.new
+
   tracs.each do |trac|
     trac_target = trac.target
     unless trac_target == "prev" then
-      val = post.send trac_target.to_sym
+      val = target.send(trac_target.to_sym)
     end
-    case trac.action
-    when "keyword" then
-      YaCan.appid = Settings.yahoo.app_id
-      val = YaCan::Keyphrase.extract(val).phrases.rand
-    when "relation" then
-      server = XMLRPC::Client.new("d.hatena.ne.jp", "/xmlrpc")
-      result = server.call("hatena.getSimilarWord", {
-                             "wordlist" => [keyphrase]
-                           })
-      words = result['wordlist'].map {|v| v['word'] }
-      if words.empty? then
-        ret.push({'text' => '特に何も思い浮かびませんね'})
-        break
-      end
-      val = words.rand
-    when "news" then
-      rss = SimpleRSS.parse open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode val}&lr&output=atom&num=5&hl=ja")
-      if rss.entries.first.nil? then
-        ret.push({'text' => '関連ニュースはないみたいです'})
-        break
-      end
-      val = rss.entries.first.title
-    when "youtube" then
-      video_obj = YoutubeSearch.search(val).rand
-      video = {'video' => [{'url' => 'http://youtube.com/v/' + video_obj['video_id'], 'name' => video_obj['name']}]}
-      break ret.push video
+    read_trac = trac_reader.send(trac.action.to_sym, val)
+    case read_trac.class
+    when "String"
+      val = read_trac
+    when "Hash"
+      ret.push(read_trac)
+      break
     end
-    ret.push({'text' => trac.pre_content + val + trac.post_content})
+    ret.push({text: trac.pre_content + val + trac.post_content})
   end
   return ret
+end
+
+# model - Trac の内容から返却するJSONの要素を生成する
+class TracReader
+  def plane val
+    val
+  end
+
+  def keyword val
+    YaCan.appid = Settings.yahoo.app_id
+    YaCan::Keyphrase.extract(val).phrases.rand
+  end
+
+  def relation val
+    server = XMLRPC::Client.new("d.hatena.ne.jp", "/xmlrpc")
+    result = server.call("hatena.getSimilarWord", {
+                           "wordlist" => [keyphrase]
+                         })
+    words = result["wordlist"].map {|v| v["word"] }
+    if words.empty? then
+      return {text: "特に何も思い浮かびません"}
+    end
+    words.rand
+  end
+
+  def news val
+    rss = SimpleRSS.parse open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode val}&lr&output=atom&num=5&hl=ja")
+    if rss.entries.first.nil? then
+      return {text: "関連ニュースはないみたいです"}
+    end
+    rss.entries.first.title
+  end
+
+  def youtube val
+    video_obj = YoutubeSearch.search(val).rand
+    {video: [{url: "http://youtube.com/v/" + video_obj['video_id'], name: video_obj["name"]}]}
+  end
 end
