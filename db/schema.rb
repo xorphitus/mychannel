@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120822002208) do
+ActiveRecord::Schema.define(:version => 20120916085849) do
 
   create_table "channels", :force => true do |t|
     t.integer  "user_id"
@@ -35,6 +35,18 @@ ActiveRecord::Schema.define(:version => 20120822002208) do
   end
 
   add_index "topics", ["channel_id"], :name => "index_topics_on_channel_id"
+
+  create_table "tracs", :force => true do |t|
+    t.integer  "topic_id"
+    t.string   "target"
+    t.string   "action"
+    t.text     "pre_content"
+    t.text     "post_content"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+  end
+
+  add_index "tracs", ["topic_id"], :name => "index_tracs_on_topic_id"
 
   create_table "users", :force => true do |t|
     t.string   "fb_id"

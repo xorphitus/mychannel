@@ -35,13 +35,6 @@
 <% unless @channels.nil? || @channels.empty? %>
 <br /><br />
 <table class="table table-striped table-hover table-condensed">
-  <tr>
-    <th>番組名</th>
-    <th>説明</th>
-    <th>編集</th>
-    <th>削除</th>
-  </tr>
-
   <% @channels.each do |channel| %>
   <tr>
     <td><%= channel.name %></td>

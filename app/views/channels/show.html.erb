@@ -12,30 +12,23 @@
   <%= @channel.description %>
 </div>
 
-<%= link_to "番組設定を変更する", edit_channel_path(@channel), class: "btn" %>
-<%= link_to "戻る", channels_path, class: "btn" %>
+<div>
+  <%= link_to "番組設定を変更する", edit_channel_path(@channel), class: "btn" %>
+  <%= link_to "戻る", channels_path, class: "btn" %>
+</div>
 
 <br />
-<br />
 
-<%= link_to "新しい話題を作る", new_topic_path, class: "btn btn-primary" %>
+<div>
+  <%= link_to "新しい話題を作る", new_topic_path({id: @channel.id}), class: "btn btn-primary" %>
+</div>
 
-<% if @channel.topics.any?  %>
-<table>
-  <tr>
-    <th>話題の名前</th>
-    <th>お題</th>
-    <th>編集</th>
-    <th>削除</th>
-  </tr>
-
+<table class="table">
   <% @channel.topics.each do |topic| %>
   <tr>
     <td><%= topic.name %></td>
-    <td><%= topic.target %></td>
-    <td><%= link_to "編集", edit_topic_path(topic) %></td>
-    <td><%= link_to "削除", topic, method: :delete, data: { confirm: "本当に削除しますか？" } %></td>
+    <td><%= link_to " 編集", edit_topic_path(topic), class: "icon-pencil" %></td>
+    <td><%= link_to " 削除", topic, method: :delete, data: {confirm: "本当に消しますか?"}, class: "icon-trash" %></td>
   </tr>
   <% end %>
 </table>
-<% end %>

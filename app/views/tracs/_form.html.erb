@@ -1,0 +1,20 @@
+<%= form.fields_for :tracs do |f| %>
+<div class="row">
+  <label class="span3">
+    <%= f.select :target, [["投稿内容", "message"], ["投稿した人", "user"], ["直前に使った言葉", "prev"], ["自由な文", "free"]] %>
+  </label>
+  <div class="span1">に狙いを定め</div>
+  <label class="span3">
+    <%= f.select :action, [["加工せず↓を読む", "plane"], ["キーワードを抜き出し↓を読む", "keyword"], ["関連する言葉を探して↓を読む", "relation"], ["ニュースを検索して読む", "news"], ["Youtubeを検索して再生する", "youtube"]] %>
+  </label>
+</div>
+<div class="row well">
+  <label class="span3">
+    <%= f.text_field :pre_content, placeholder: "頭にくっつける言葉" %>
+  </label>
+  <div class="span2">+ (↑の言葉) ＋</div>
+  <label class="span3">
+    <%= f.text_field :post_content, placeholder: "お尻にくっつける言葉" %>
+  </label>
+</div>
+<% end %>

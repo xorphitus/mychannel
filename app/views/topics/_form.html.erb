@@ -1,9 +1,7 @@
-<%= form_for(@topic) do |f| %>
+<%= form_for([@channel, @topic]) do |f| %>
   <% if @topic.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@topic.errors.count, "error") %> prohibited this topic from being saved:</h2>
-
-      <ul>
+    <div class="alert alert-error">
+      <ul class="unstyled">
       <% @topic.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>
       <% end %>
@@ -12,26 +10,40 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :channel %><br />
-    <%= f.text_field :channel %>
+    <label>
+      見出し
+      <%= f.text_field :name %>
+    </label>
   </div>
   <div class="field">
-    <%= f.label :name %><br />
-    <%= f.text_field :name %>
+    <label>お題</label>
+    <label class="radio">
+      <%= f.radio_button :target, "feed" %>
+      あなたの投稿
+    </label><br />
+    <label class="radio">
+      <%= f.radio_button :target, "home" %>
+      友達の投稿
+    </label><br />
+    <label class="radio">
+      <%= f.radio_button :target, "music" %>
+      あなたの好きな音楽
+    </label><br />
+    <label class="radio">
+      <%= f.radio_button :target, "free" %>
+      自由な文章
+    </label>
   </div>
   <div class="field">
-    <%= f.label :target %><br />
-    <%= f.text_field :target %>
+    <label>
+      お題テキスト
+      <%= f.text_area :target_text, rows: 3 %>
+    </label>
   </div>
-  <div class="field">
-    <%= f.label :target_text %><br />
-    <%= f.text_area :target_text %>
-  </div>
-  <div class="field">
-    <%= f.label :order %><br />
-    <%= f.number_field :order %>
-  </div>
+  <% unless @topic.id.nil? %>
+  <%= render partial: "tracs/form", locals: {form: f} %>
+  <% end %>
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit "保存", class: "btn" %>
   </div>
 <% end %>
