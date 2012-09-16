@@ -15,25 +15,17 @@
       <%= f.text_field :name %>
     </label>
   </div>
-  <div class="field">
+  <div class="field" id="topic_targets">
     <label>お題</label>
+    <% get_topic_target(@topic).each do |item| %>
     <label class="radio">
-      <%= f.radio_button :target, "feed" %>
-      あなたの投稿
-    </label><br />
-    <label class="radio">
-      <%= f.radio_button :target, "home" %>
-      友達の投稿
-    </label><br />
-    <label class="radio">
-      <%= f.radio_button :target, "music" %>
-      あなたの好きな音楽
-    </label><br />
-    <label class="radio">
-      <%= f.radio_button :target, "free" %>
-      自由な文章
-      <%= f.text_area :target_text, rows: 3 %>
+      <%= f.radio_button :target, item[:value] %>
+      <%= item[:label] %>
+      <% if item[:value] == "free" %>
+      <%= f.text_area :target_text, rows: 3, id: "topic_target_text" %>
+      <% end %>
     </label>
+    <% end %>
   </div>
   <% unless @topic.id.nil? %>
   <%= render partial: "tracs/form", locals: {form: f} %>

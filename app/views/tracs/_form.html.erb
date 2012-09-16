@@ -4,18 +4,25 @@
     <td>
       <div class="row offset1">
         <label class="span3">
-          <%= f.select :target, [["投稿内容", "message"], ["投稿した人", "user"], ["直前に使った言葉", "prev"], ["自由な文", "free"]] %>
+          <%= f.select :target, get_trac_target(@topic), {}, class: "trac_target" %>
         </label>
-        <div class="span1">に狙いを定め</div>
-        <label class="span3">
-          <%= f.select :action, [["加工せず↓を読む", "plane"], ["キーワードを抜き出し↓を読む", "keyword"], ["関連する言葉を探して↓を読む", "relation"], ["ニュースを検索して読む", "news"], ["Youtubeを検索して再生する", "youtube"]] %>
+        <div class="span2">&nbsp;&nbsp;&nbsp;を対象に</div>
+        <label class="span3 trac_action">
+          <%= f.select :action,
+              [["↓を読む", "plane"],
+              ["キーワードを抜き出し↓を読む", "keyword"],
+              ["関連する言葉を探して↓を読む", "relation"],
+              ["ニュースを検索して↓を読む", "news"],
+              ["Youtubeを検索して再生する", "youtube"]] %>
         </label>
       </div>
       <div class="row well offset1">
         <label class="span3">
           <%= f.text_field :pre_content, placeholder: "頭にくっつける言葉" %>
         </label>
-        <div class="span2">+ (↑の言葉) ＋</div>
+        <div class="span1">
+          &nbsp;&nbsp;&nbsp;<i class="icon-comment"></i>
+        </div>
         <label class="span3">
           <%= f.text_field :post_content, placeholder: "お尻にくっつける言葉" %>
         </label>
