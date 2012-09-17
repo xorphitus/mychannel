@@ -9,12 +9,11 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        format.html { redirect_to :channel, notice: "保存しました" }
+        format.html { redirect_to :channels, notice: "保存しました" }
         format.json { render json: @user, status: :created, location: @user }
       else
-        # TODO これだとエラー系のステータスコードが返らない status: :unprocessable_entity
         format.html { redirect_to :channels, alert: @user.errors }
-        format.json { render json: @user.errors }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -29,9 +28,8 @@ class UsersController < ApplicationController
         format.html { redirect_to :channels, notice: "保存しました" }
         format.json { head :no_content }
       else
-        # TODO これだとエラー系のステータスコードが返らない status: :unprocessable_entity
         format.html { redirect_to :channels, alert: @user.errors }
-        format.json { render json: @user.errors }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
       end
     end
   end

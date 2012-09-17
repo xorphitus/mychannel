@@ -6,6 +6,7 @@ gem 'rails', '3.2.7'
 group :development do
   gem 'rspec-rails', '~> 2.0'
   gem 'jasmine'
+  gem 'simplecov'
 end
 
 # db
