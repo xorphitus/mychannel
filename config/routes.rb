@@ -8,6 +8,7 @@ Mychannel::Application.routes.draw do
   end
 
   root :to => 'login#index'
+  match 'logout' => 'logout#index'
 
   match 'dashboard' => 'dashboard#index'
 

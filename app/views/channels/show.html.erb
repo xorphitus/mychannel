@@ -1,3 +1,7 @@
+<% content_for :head do %>
+<%= render partial: "edit/head_menu" %>
+<% end %>
+
 <% unless notice.nil? %>
 <div id="notice" class="alert alert-success">
   <%= notice %>
@@ -22,6 +26,8 @@
 <div>
   <%= link_to "新しい話題を作る", new_topic_path({id: @channel.id}), class: "btn btn-primary" %>
 </div>
+
+<br />
 
 <table class="table">
   <% @channel.topics.each do |topic| %>

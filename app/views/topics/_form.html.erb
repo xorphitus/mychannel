@@ -28,6 +28,9 @@
     <% end %>
   </div>
   <% unless @topic.id.nil? %>
+  <% unless @topic.errors.any? %>
+  <% @topic.tracs.build %>
+  <% end %>
   <%= render partial: "tracs/form", locals: {form: f} %>
   <% end %>
   <div class="actions">

@@ -1,10 +1,20 @@
+<% content_for :head do %>
+<%= render partial: "head_menu" %>
+<% end %>
+
 <h1>
   あなたのFacebookから作った番組
   <%= image_tag "ajaxindicator.gif", style: "display:none;", id: "loadingimg" %>
 </h1>
 
 <p>
-  このページを開いて置いておくだけ！ラジオが勝手に放送されます
+  番組を選ぶとラジオが放送されます
+</p>
+<p>
+  <%= select_tag "", options_for_select(@channel_list), {id: "channel_selector", include_blank: true} %>
+  <a href="#" id="play_btn">
+    <i class="icon-play-circle"></i>&nbsp;GO
+  </a>
 </p>
 
 <div class="row">
@@ -25,4 +35,3 @@
 <script>
   google.load("swfobject", "2.2");
 </script>
-

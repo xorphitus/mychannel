@@ -39,15 +39,19 @@ def Story.get_default me
   [topic1, topic2, topic3]
 end
 
-def Story.get me
-  channels = Channel.find_by_user_id(me.user_id)
-  if channels.nil? then
+def Story.get(me, channel_id)
+  if channel_id.nil? then
     topics = Story.get_default me
   else
-    # TODO USER INNER JOIN
-    topics = channels.rand.topics
-    if topics.nil? then
+    # TODO inner join!
+    channel = Channel.find_by_id(channel_id)
+    if channel.nil?
       topics = Story.get_default me
+    else
+      topics = channel.topics
+      if topics.nil? then
+        return [({text: "この番組は作りかけなので、他の番組を選んで下さい"})]
+      end
     end
   end
 

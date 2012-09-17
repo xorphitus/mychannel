@@ -5,6 +5,7 @@ initTracAction = (elem) ->
   target = elem.closest('.row').next(':first')
   target.toggle(elem.find('option:selected').val() isnt 'youtube')
 
+$('#topic_target_text').hide()
 $('#topic_targets').find('input:radio').click ->
   initTopicTarget($(@))
 .end().find('input:radio:checked').each ->
@@ -15,5 +16,4 @@ $('.trac_action').change ->
 .each ->
   initTracAction($(@))
 
-$('.trac_target').each ->
-  #
+$('#trac_list').find('tr:last').addClass('info')

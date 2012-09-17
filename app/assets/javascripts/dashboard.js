@@ -36,9 +36,12 @@ $(function () {
 
     var LOADING_IMG_ID = 'loadingimg',
         TEXT_DISPLAY_ID = 'textdisplay',
+        PLAY_BTN_ID = 'play_btn',
+        CHANNEL_SELECTOR_ID = 'channel_selector',
         queue = [],
         exec,
-        loadData;
+        loadData,
+        channelId;
 
     exec = function (t) {
         var target = t;
@@ -69,13 +72,19 @@ $(function () {
 
     loadData = function () {
         $('#' + LOADING_IMG_ID).show();
-        $.get('/story', function (data) {
+        $.get('/story?channel_id=' + channelId, function (data) {
             queue = data;
             $('#' + LOADING_IMG_ID).hide();
             exec(queue.shift());
         });
     };
 
-    loadData();
-
+    $('#' + PLAY_BTN_ID).click(function () {
+        channelId = $('#' + CHANNEL_SELECTOR_ID).val();
+        if (channelId) {
+            loadData();
+        } else {
+            alert('番組を選んで下さい');
+        }
+    });
 });

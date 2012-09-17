@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class ChannelsController < ApplicationController
   include Authentication
 
@@ -21,7 +22,8 @@ class ChannelsController < ApplicationController
   # GET /channels/1.json
   def show
     @channel = Channel.find(params[:id])
-    @channel.topics.sort! { |a, b| a.order < b.order }
+    # TODO 何かのバグでorderがnilになってここで落ちるのでとりあえずコメントアウト
+    #@channel.topics.sort! { |a, b| a.order < b.order }
 
     respond_to do |format|
       format.html # show.html.erb

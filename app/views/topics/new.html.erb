@@ -1,5 +1,9 @@
+<% content_for :head do %>
+<%= render partial: "edit/head_menu" %>
+<% end %>
+
 <h1>新しい話題を作る</h1>
 
 <%= render 'form' %>
 
-<%# link_to "キャンセル", show_channel_path({id: @topic.channel_id}), class: "btn" %>
+<%= link_to "キャンセル", {controller: :channels, action: :show, id: @topic.channel_id}, {class: "btn"} %>

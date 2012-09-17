@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 module Authentication
-
-  class UnauthorizedError < StandardError; end
-
   def self.included base
     base.before_filter :require_authentication
   end
