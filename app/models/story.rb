@@ -13,149 +13,57 @@ class Array
   end
 end
 
-# このモジュールのメソッドがランダムで呼ばれる
-# トピックを増やしたければ任意の箇所でこのモジュールにメソッドを追加すればよい
-# DEPRECATED: DB対応したことによって意味を失った
-module StoryGenerator
-  # ウォールの内容 (ランダム) とそこに含まれるキーワードに関連したニュースを取得
-  def get_wall_and_news me
-    targets = me.home.select { |item| !item.message.nil? }
-    if targets.empty?
-      return [({"text" => "最近はお友達のコメントもご無沙汰ですね"})]
-    end
-
-    ret = []
-    post = targets.rand
-    text = post.from().name + "さんからのポストです。\n" + post.message
-
-    ret.push({'text' => text})
-
-    YaCan.appid = Settings.yahoo.app_id
-    k = YaCan::Keyphrase.extract post.message
-    unless k.phrases.empty?
-      keyphrase = k.phrases[0]
-      ret.push({"text" => keyphrase + "といえば"})
-      rss = SimpleRSS.parse open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode keyphrase}&lr&output=atom&num=5&hl=ja")
-      if rss.entries.first.nil?
-        ret.push({"text" => "関連ニュースはないみたいです"})
-      else
-        ret.push({"text" => rss.entries.first.title})
-        ret.push({"text" => "なんてニュースがあるみたいです"})
-      end
-    end
-
-    return ret
-  end
-
-  # 自分の投稿 (ランダム) とそこへのリアクション
-  def get_selfpost_and_reactions me
-    targets = me.feed.select { |item| !item.message.nil? }
-    if targets.empty?
-      return [({"text" => "最近はFacebookへの投稿をしていないようですね"})]
-    end
-
-    ret = []
-    post = targets.rand
-    ret.push({"text" => "先日のあなたの投稿です"})
-    message = post.message
-    ret.push({"text" => message})
-
-    unless post.comments.empty?
-      # TODO nameではなくidでrejectしたいけどidが取得できない?!
-      comment_data = post.comments.reject { |item| item.from.name == me.name }
-      unless comment_data.empty?
-        comment = comment_data.rand
-        ret.push({"text" => comment.from.name + "さんからのコメントです"})
-        ret.push({"text" => comment.message})
-      end
-    end
-
-    unless post.likes.empty?
-      # TODO nameではなくidでrejectしたいけどidが取得できない?!
-      like_data = post.likes.reject { |item| item.name == me.name }
-      if like_data.length == 1
-        ret.push({"text" => like_data.first.name + "さんがイイネと言っています"})
-      elsif like_data.length > 1
-        ret.push({"text" => "#{like_data.rand.name}さん、ほか#{like_data.length - 1}人が「いいね」と言っています"})
-      end
-    end
-
-    # TODO ここは友達のリプライを取得して感情APIを叩くようにする
-    YaCan.appid = Settings.yahoo.app_id
-    k = YaCan::Keyphrase.extract post.message
-    unless k.phrases.empty?
-      keyphrase = k.phrases[0]
-      ret.push({"text" => keyphrase + "といえば"})
-      server = XMLRPC::Client.new("d.hatena.ne.jp", "/xmlrpc")
-      result = server.call("hatena.getSimilarWord", {
-                             "wordlist" => [keyphrase]
-                           })
-      words = result["wordlist"].map { |v| v['word'] }
-      unless words.empty?
-        ret.push({"text" => words.rand + "を思い浮かべますね"})
-      else
-        ret.push({"text" => "特に何も思い浮かびませんね"})
-      end
-    end
-
-    return ret
-  end
-
-  # お気に入りと思しき音楽を取得
-  def get_favorite_music me
-    ret = []
-
-    music_list = me.music
-    if music_list.empty?
-      text = '音楽はあまりお好みではないですか?'
-      return ret.push({"text" => text})
-    end
-
-    ret.push({"text" => "では、あなたのお気に入り、かもしれない一曲をどうぞ"})
-
-    keyword = music_list.rand.name
-    video_obj = YoutubeSearch.search(keyword).rand
-    video = {"video" => [{"url" => "http://youtube.com/v/" + video_obj["video_id"], "name" => video_obj["name"]}]}
-    ret.push(video)
-  end
-
-end
-
 # View層のラジオプレイヤーに読ませるJSONデータを生成する
 class Story
-  extend StoryGenerator
 end
 
 def Story.get_default me
-  # TODO ダミーのTopic, Tracのモデルを使うよう変更する
-  self.send(StoryGenerator.public_instance_methods.rand, me)
+  topic1 = Topic.new(target: "feed")
+  trac1_1 = Trac.new(target: "message", action: "plane", pre_content: "あなたの投稿 ", post_content: "")
+  trac1_2 = Trac.new(target: "prev", action: "keyword", pre_content: "", post_content: "といえば")
+  trac1_3 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
+  topic1.tracs = [trac1_1, trac1_2, trac1_3]
+
+  topic2 = Topic.new(target: "home")
+  trac2_1 = Trac.new(target: "from.name", action: "plane", pre_content: "", post_content: "さんからの投稿")
+  trac2_2 = Trac.new(target: "message", action: "plane", pre_content: "", post_content: "")
+  trac2_3 = Trac.new(target: "prev", action: "keyword", pre_content: "", post_content: "といえば")
+  trac2_4 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
+  topic2.tracs = [trac2_1, trac2_2, trac2_3, trac2_4]
+
+  topic3 = Topic.new(target: "music")
+  trac3_1 = Trac.new(target: "name", action: "plane", pre_content: "あなたのお気に入り ", post_content: "にちなんだ一曲をどうぞ")
+  trac3_2 = Trac.new(target: "prev", action: "youtube", pre_content: "", post_content: "")
+  topic3.tracs = [trac3_1, trac3_2]
+
+  [topic1, topic2, topic3]
 end
 
 def Story.get me
-  # TODO fix the line below
-  #channels = Channel.find :all, include: :user, conditions: ["user.fb_id = ?", me.user_id]
-  channels = Channel.find(:all)
+  channels = Channel.find_by_user_id(me.user_id)
   if channels.nil? then
-    return Story.get_default me
-  end
-  # TODO USER INNER JOIN
-  topics = channels.rand.topics
-  if topics.nil? then
-    return Story.get_default me
-  end
-  topic = topics.rand
-  tracs = topic.tracs
-  if tracs.empty? then
-    return Story.get_default me
+    topics = Story.get_default me
+  else
+    # TODO USER INNER JOIN
+    topics = channels.rand.topics
+    if topics.nil? then
+      topics = Story.get_default me
+    end
   end
 
-  targets = me.send(topic.target.to_sym).select {|item| !item.message.nil?}
-  if targets.nil? then
+  topic = topics.rand
+  tracs = topic.tracs
+
+  fb_targets = me.send(topic.target.to_sym)
+  if topic.target == "home" || topic.target == "feed"
+    fb_targets.select! { |item| !item.message.nil? }
+  end
+  if fb_targets.nil? then
     return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
   end
 
-  ret = []
-  target = targets.rand
+  result_json = []
+  fb_target = fb_targets.rand
 
   val = nil
   trac_reader = TracReader.new
@@ -163,19 +71,23 @@ def Story.get me
   tracs.each do |trac|
     trac_target = trac.target
     unless trac_target == "prev" then
-      val = target.send(trac_target.to_sym)
+      recv = fb_target
+      trac_target.split(".").each do |i|
+        recv = recv.send(i.to_sym)
+      end
+      val = recv
     end
     read_trac = trac_reader.send(trac.action.to_sym, val)
-    case read_trac.class
+
+    case read_trac.class.to_s
     when "String"
       val = read_trac
+      result_json.push({text: trac.pre_content + val + trac.post_content})
     when "Hash"
-      ret.push(read_trac)
-      break
+      result_json.push(read_trac)
     end
-    ret.push({text: trac.pre_content + val + trac.post_content})
   end
-  return ret
+  return result_json
 end
 
 # model - Trac の内容から返却するJSONの要素を生成する
