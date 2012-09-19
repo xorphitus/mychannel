@@ -17,7 +17,7 @@
   </div>
   <div class="field" id="topic_targets">
     <label>お題</label>
-    <% get_topic_target(@topic).each do |item| %>
+    <% get_topic_target_choices(@topic).each do |item| %>
     <label class="radio">
       <%= f.radio_button :target, item[:value] %>
       <%= item[:label] %>

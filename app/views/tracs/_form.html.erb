@@ -4,16 +4,11 @@
     <td>
       <div class="row offset1">
         <label class="span3">
-          <%= f.select :target, get_trac_target(@topic), {}, class: "trac_target" %>
+          <%= f.select :target, get_trac_target_choices(@topic), {}, class: "trac_target" %>
         </label>
         <div class="span2">&nbsp;&nbsp;&nbsp;を対象に</div>
         <label class="span3 trac_action">
-          <%= f.select :action,
-              [["↓を読む", "plane"],
-              ["キーワードを抜き出し↓を読む", "keyword"],
-              ["関連する言葉を探して↓を読む", "relation"],
-              ["ニュースを検索して↓を読む", "news"],
-              ["Youtubeを検索して再生する", "youtube"]] %>
+          <%= f.select :action, get_trac_action_choices %>
         </label>
       </div>
       <div class="row well offset1">

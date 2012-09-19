@@ -2,7 +2,6 @@
 require 'xmlrpc/client'
 
 # Arrayにrandメソッドを追加
-# TODO 外出しすべき？
 class Array
   # get randan element of array
   def rand
@@ -13,11 +12,12 @@ class Array
   end
 end
 
-# View層のラジオプレイヤーに読ませるJSONデータを生成する
-class Story
-end
+class TracParseException < Exception; end
 
-def Story.get_default me
+# View層のラジオプレイヤーに読ませるJSONデータを生成する
+class Story; end
+
+def Story.get_default_topics
   topic1 = Topic.new(target: "feed")
   trac1_1 = Trac.new(target: "message", action: "plane", pre_content: "あなたの投稿 ", post_content: "")
   trac1_2 = Trac.new(target: "prev", action: "keyword", pre_content: "", post_content: "といえば")
@@ -41,12 +41,12 @@ end
 
 def Story.get(me, channel_id)
   if channel_id.nil? then
-    topics = Story.get_default me
+    topics = Story.get_default_topics
   else
     # TODO inner join!
     channel = Channel.find_by_id(channel_id)
     if channel.nil?
-      topics = Story.get_default me
+      topics = Story.get_default_topics
     else
       topics = channel.topics
       if topics.nil? then
@@ -89,6 +89,8 @@ def Story.get(me, channel_id)
       result_json.push({text: trac.pre_content + val + trac.post_content})
     when "Hash"
       result_json.push(read_trac)
+    else
+      raise TracParseException
     end
   end
   return result_json

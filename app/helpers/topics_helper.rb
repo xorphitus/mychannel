@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 module TopicsHelper
-  def get_topic_target topic
+  def get_topic_target_choices(topic)
     items = []
     items.push({value: "feed", label: "自分の投稿"})
     items.push({value: "home", label: "友達の投稿"})
@@ -13,7 +13,7 @@ module TopicsHelper
     items
   end
 
-  def get_trac_target topic
+  def get_trac_target_choices(topic)
     items = []
     case topic.target
     when "home", "feed"
@@ -28,5 +28,14 @@ module TopicsHelper
       items.push(["入力した文章", "prev"])
     end
     items.push(["直前に使った言葉", "prev"])
+  end
+
+  def get_trac_action_choices
+    items = []
+    items.push(["↓を読む", "plane"])
+    items.push(["キーワードを抜き出し↓を読む", "keyword"])
+    items.push(["関連する言葉を探して↓を読む", "relation"])
+    items.push(["ニュースを検索して↓を読む", "news"])
+    items.push(["Youtubeを検索して再生する", "youtube"])
   end
 end
