@@ -1,4 +1,6 @@
 <%= form_for([@channel, @topic]) do |f| %>
+
+  <%# TODO この辺りがうまく機能していない様子 %>
   <% if @topic.errors.any? %>
     <div class="alert alert-error">
       <ul class="unstyled">
@@ -12,14 +14,14 @@
   <div class="field">
     <label>
       見出し
-      <%= f.text_field :name %>
+      <%= f.text_field :name, required: "", maxlength: 20, placeholder: "見出しを入力して下さい" %>
     </label>
   </div>
   <div class="field" id="topic_targets">
     <label>お題</label>
     <% get_topic_target_choices(@topic).each do |item| %>
     <label class="radio">
-      <%= f.radio_button :target, item[:value] %>
+      <%= f.radio_button :target, item[:value], required: "" %>
       <%= item[:label] %>
       <% if item[:value] == "free" %>
       <%= f.text_area :target_text, rows: 3, id: "topic_target_text" %>

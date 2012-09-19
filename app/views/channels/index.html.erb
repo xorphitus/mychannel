@@ -23,7 +23,7 @@
 <%= form_for(@user, url: {controller: :users, action: (@user.name.nil? ? "create" : "update"), id: @user.id}, html: {class: "form-inline"}) do |f| %>
 <label>
   ラジオネーム
-  <%= f.text_field :name, placeholder: "名前を入れて下さい" %>
+  <%= f.text_field :name, placeholder: "名前を入れて下さい", required: "", maxlength: 20 %>
 </label>
 <%= f.submit "保存する", class: "btn" %>
 <% end %>
@@ -33,7 +33,7 @@
   ラジオネームを保存すると番組を作れます
 </div>
 <% else %>
-<%= link_to "チャンネルを作る", new_channel_path, class: "btn btn-primary" %>
+<%= link_to "番組を作る", new_channel_path, class: "btn btn-primary" %>
 <% end %>
 
 <% unless @channels.nil? || @channels.empty? %>

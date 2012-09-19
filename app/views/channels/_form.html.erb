@@ -12,13 +12,13 @@
   <div class="field">
     <label>
       番組名
-      <%= f.text_field :name %>
+      <%= f.text_field :name, required: "", maxlength: 20, placeholder: "番組名を入れて下さい" %>
     </label>
   </div>
   <div class="field">
     <label>
       番組の説明
-      <%= f.text_area :description, rows: 3 %>
+      <%= f.text_area :description, rows: 3, maxlength: 100 %>
     </label>
   </div>
   <div class="actions">

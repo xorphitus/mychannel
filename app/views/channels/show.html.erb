@@ -18,10 +18,15 @@
 
 <div>
   <%= link_to "番組設定を変更する", edit_channel_path(@channel), class: "btn" %>
-  <%= link_to "戻る", channels_path, class: "btn" %>
+  <%= link_to "番組の一覧に戻る", channels_path, class: "btn" %>
 </div>
 
 <br />
+
+<div class="alert alert-info">
+  番組内で語られる話題を作成して下さい。<br />
+  作成した話題はランダムに選ばれ、音声で再生されます。
+</div>
 
 <div>
   <%= link_to "新しい話題を作る", new_topic_path({id: @channel.id}), class: "btn btn-primary" %>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class TopicsController < ApplicationController
   # GET /topics/new
   # GET /topics/new.json
@@ -31,6 +32,7 @@ class TopicsController < ApplicationController
 
     respond_to do |format|
       if @topic.save
+        # TODO ここのnoticeが表示されるところがない
         format.html { redirect_to action: :edit, id: @topic.id, notice: 'Topic was successfully created.' }
         format.json { render json: @topic, status: :created, location: @topic }
       else
@@ -47,6 +49,7 @@ class TopicsController < ApplicationController
 
     respond_to do |format|
       if @topic.update_attributes(params[:topic])
+        # TODO ここのnoticeが表示されるところがない
         format.html { render action: "edit", notice: "Topic was successfully updated." }
         format.json { head :no_content }
       else
@@ -60,10 +63,11 @@ class TopicsController < ApplicationController
   # DELETE /topics/1.json
   def destroy
     @topic = Topic.find(params[:id])
+    channel = Channel.find(@topic.channel_id)
     @topic.destroy
 
     respond_to do |format|
-      format.html { redirect_to channels_url }
+      format.html { redirect_to channel }
       format.json { head :no_content }
     end
   end
