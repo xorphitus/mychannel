@@ -1,13 +1,14 @@
-/*global setInterval, clearInterval, document, $, swfobject */
+/*global setInterval, alert, document, $, swfobject */
 
 var video = {},
     onYouTubePlayerReady;
 
 video.ID = 'videoplayer';
-video.PLAYER_ID = 'mychannerlVideoplayer';
+video.PLAYER_ID = 'mychannelVideoplayer';
 video.set = function (url, callback) {
     'use strict';
-    var params = { allowScriptAccess: "always" },
+    var player = document.getElementById(video.PLAYER_ID),
+        params = { allowScriptAccess: "always" },
         atts = { id: video.PLAYER_ID },
         id = 'videoplayerTarget',
         width = '425',
@@ -15,8 +16,12 @@ video.set = function (url, callback) {
         flashVersion = '8',
         targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer';
 
-    video.onFinish = callback;
-    swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts);
+    if (player) {
+        player.loadVideoByUrl(targetUrl);
+    } else {
+        video.onFinish = callback;
+        swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts);
+    }
 };
 video.onPlayerStateChange = function (state) {
     'use strict';
@@ -24,7 +29,7 @@ video.onPlayerStateChange = function (state) {
         video.onFinish();
     }
 };
-onYouTubePlayerReady = function (id) {
+onYouTubePlayerReady = function () {
     'use strict';
     var player = document.getElementById(video.PLAYER_ID);
     player.addEventListener('onStateChange', 'video.onPlayerStateChange');
@@ -38,6 +43,8 @@ $(function () {
         TEXT_DISPLAY_ID = 'textdisplay',
         PLAY_BTN_ID = 'play_btn',
         CHANNEL_SELECTOR_ID = 'channel_selector',
+        LOAD_INTERVAL_MILLIS = 3000,
+        QUEUE_SIZE = 3,
         queue = [],
         exec,
         loadData,
@@ -49,7 +56,7 @@ $(function () {
             if (queue && queue.length > 0) {
                 target = queue.shift();
             } else {
-                loadData();
+                loadData(exec);
                 return;
             }
         }
@@ -62,7 +69,8 @@ $(function () {
         } else if (target.video) {
             $('#' + video.ID).slideDown();
             video.set(target.video[0].url, function () {
-                $('#' + video.ID).slideUp();
+                // TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
+                // $('#' + video.ID).slideUp();
                 exec(queue.shift());
             });
         } else {
@@ -70,19 +78,26 @@ $(function () {
         }
     };
 
-    loadData = function () {
+    loadData = function (callback) {
         $('#' + LOADING_IMG_ID).show();
         $.get('/story?channel_id=' + channelId, function (data) {
-            queue = data;
+            queue = queue.concat(data);
             $('#' + LOADING_IMG_ID).hide();
-            exec(queue.shift());
+            if (typeof callback === 'function') {
+                callback();
+            }
         });
     };
 
     $('#' + PLAY_BTN_ID).click(function () {
         channelId = $('#' + CHANNEL_SELECTOR_ID).val();
         if (channelId) {
-            loadData();
+            setInterval(function () {
+                if (queue.length < QUEUE_SIZE) {
+                    loadData();
+                }
+            }, LOAD_INTERVAL_MILLIS);
+            exec();
         } else {
             alert('番組を選んで下さい');
         }
