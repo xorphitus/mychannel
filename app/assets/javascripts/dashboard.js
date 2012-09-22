@@ -36,6 +36,30 @@ onYouTubePlayerReady = function () {
     player.playVideo();
 };
 
+var linkDisplay = (function () {
+    'use strict';
+    var LINK_DISPLAY_ID = 'linkdisplay',
+        LINK_TEXT_MAX_SIZE = 50;
+
+    return {
+        add: function (links) {
+            links.forEach(function (i) {
+                var li = $('<li>'),
+                    icon = $('<i>').addClass('icon-hand-right'),
+                    a = $('<a>').attr({href: i, target: '_blank'})
+                        .addClass('btn btn-link'),
+                    text = i;
+                if (text.length > LINK_TEXT_MAX_SIZE) {
+                    text = text.substring(0, LINK_TEXT_MAX_SIZE) + '...';
+                }
+                a.text(text);
+
+                $('#' + LINK_DISPLAY_ID).append(li.append(icon).append(a));
+            });
+        }
+    };
+}());
+
 $(function () {
     'use strict';
 
@@ -66,6 +90,9 @@ $(function () {
                 $(this).unbind('ended');
                 exec(queue.shift());
             });
+            if (target.link) {
+                linkDisplay.add(target.link);
+            }
         } else if (target.video) {
             $('#' + video.ID).slideDown();
             video.set(target.video[0].url, function () {

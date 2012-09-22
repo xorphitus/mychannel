@@ -36,6 +36,6 @@ describe User do
       user = User.new({fb_id: "1", name: "a" * 21})
       user.should_not be_valid
     end
-
   end
+
 end
