@@ -62,7 +62,7 @@ describe Story do
           "hoge news"
         end
         def entry.link
-          "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html"
+          "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001"
         end
         [entry]
       end
@@ -131,7 +131,7 @@ describe Story do
 
       it "extracts actual URL from Google NEWS fomat URL to redirect" do
         news = TracReader.new.news("test")
-        news.link.should == ["http://foo.com/bar.html"]
+        news.link.should == ["http://foo.com/bar.html?id=001"]
       end
     end
 

@@ -171,6 +171,7 @@ class TracReader
     link = CGI::unescapeHTML(news.link)
     delimiter = "&url="
     link = link[link.index(delimiter) + delimiter.size, link.size]
+    link = URI.decode(link)
     result.link = [link]
 
     result
