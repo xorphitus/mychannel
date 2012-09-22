@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 class LogoutController < ApplicationController
+  include Authentication
   def index
-    cookies.each do |k, v|
-      # TODO 実際は消えてない!?
-      cookies.delete(k)
-    end
-    redirect_to root_url
+    redirect_to "https://www.facebook.com/logout.php?next=#{root_url}&access_token=#{@access_token}"
   end
 end
