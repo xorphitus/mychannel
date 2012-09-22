@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-require 'xmlrpc/client'
+require "nokogiri"
+require "open-uri"
 require "cgi"
 
 # Arrayにrandメソッドを追加
@@ -23,14 +24,15 @@ class Story; end
 def Story.get_default_topics
   topic1 = Topic.new(target: "feed")
   trac1_1 = Trac.new(target: "message", action: "plane", pre_content: "あなたの投稿 ", post_content: "")
-  trac1_2 = Trac.new(target: "prev", action: "keyword", pre_content: "", post_content: "といえば")
-  trac1_3 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
-  topic1.tracs = [trac1_1, trac1_2, trac1_3]
+  trac1_2 = Trac.new(target: "prev", action: "keyword", pre_content: "「", post_content: "」といえば")
+  trac1_3 = Trac.new(target: "prev", action: "relation", pre_content: "「", post_content: "」ですが")
+  trac1_4 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
+  topic1.tracs = [trac1_1, trac1_2, trac1_3, trac1_4]
 
   topic2 = Topic.new(target: "home")
   trac2_1 = Trac.new(target: "from.name", action: "plane", pre_content: "", post_content: "さんからの投稿")
   trac2_2 = Trac.new(target: "message", action: "plane", pre_content: "", post_content: "")
-  trac2_3 = Trac.new(target: "prev", action: "keyword", pre_content: "", post_content: "といえば")
+  trac2_3 = Trac.new(target: "prev", action: "keyword", pre_content: "「", post_content: "」といえば")
   trac2_4 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
   topic2.tracs = [trac2_1, trac2_2, trac2_3, trac2_4]
 
@@ -86,10 +88,13 @@ def Story.get(me, channel_id)
       end
       inherited_value = recv
     end
+
     structured_trac = trac_reader.send(trac.action.to_sym, inherited_value)
     json_elem = structured_trac.to_hash
     if structured_trac.text_decoration_flag
-      inherited_value = structured_trac.text
+      if structured_trac.inheritance_flag
+        inherited_value = structured_trac.text
+      end
       json_elem[:text] = "#{trac.pre_content}#{inherited_value}#{trac.post_content}"
     end
     result_json_array.push(json_elem)
@@ -100,9 +105,10 @@ end
 
 # TracをブラウザのハンドリングできるJSON形式に変換する前段階の構造
 class StructuredTrac
-  attr_accessor :text, :link, :video, :text_decoration_flag
+  attr_accessor :text, :link, :video, :text_decoration_flag, :inheritance_flag
   def initialize
     self.text_decoration_flag = true
+    self.inheritance_flag = true
   end
   def to_hash
     hash = {}
@@ -142,17 +148,25 @@ class TracReader
 
   def relation val
     result = StructuredTrac.new
-    server = XMLRPC::Client.new("d.hatena.ne.jp", "/xmlrpc")
-    result = server.call("hatena.getSimilarWord", {
-                           "wordlist" => [keyphrase]
-                         })
-    words = result["wordlist"].map { |v| v["word"] }
-    if words.empty? then
-      result.text = "特に何も思い浮かびません"
+
+    relations = Nokogiri::XML(open("http://search.yahooapis.jp/AssistSearchService/V1/webunitSearch?appid=#{Settings.yahoo.app_id}&query=#{URI.encode(val)}"))
+
+    targets = relations.css("Result").map { |node| node.content }
+
+    if targets.empty?
+      result.text = "とくに連想するものはありませんが"
+      result.inheritance_flag = false
       result.text_decoration_flag = false
-      return result
+    else
+      relational_words = targets.rand.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
+      if relational_words.empty?
+        result.text = "とくに連想するものはありませんが"
+        result.inheritance_flag = false
+        result.text_decoration_flag = false
+      else
+        result.text = relational_words.rand
+      end
     end
-    result.text = words.rand
 
     result
   end
