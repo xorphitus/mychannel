@@ -2,10 +2,10 @@ class CreateTopics < ActiveRecord::Migration
   def change
     create_table :topics do |t|
       t.references :channel
-      t.string :name
-      t.string :target
+      t.string :name, null: false
+      t.string :target, null: false
       t.text :target_text
-      t.integer :order
+      t.integer :order, null: false, default: 0
 
       t.timestamps
     end

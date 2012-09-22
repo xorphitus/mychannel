@@ -14,32 +14,32 @@
 ActiveRecord::Schema.define(:version => 20120916085849) do
 
   create_table "channels", :force => true do |t|
-    t.integer  "user_id"
-    t.string   "name"
-    t.boolean  "publish_flag"
+    t.integer  "user_id",                         :null => false
+    t.string   "name",                            :null => false
+    t.boolean  "publish_flag", :default => false, :null => false
     t.text     "description"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
   end
 
   add_index "channels", ["user_id"], :name => "index_channels_on_user_id"
 
   create_table "topics", :force => true do |t|
     t.integer  "channel_id"
-    t.string   "name"
-    t.string   "target"
+    t.string   "name",                       :null => false
+    t.string   "target",                     :null => false
     t.text     "target_text"
-    t.integer  "order"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
+    t.integer  "order",       :default => 0, :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
   end
 
   add_index "topics", ["channel_id"], :name => "index_topics_on_channel_id"
 
   create_table "tracs", :force => true do |t|
     t.integer  "topic_id"
-    t.string   "target"
-    t.string   "action"
+    t.string   "target",       :null => false
+    t.string   "action",       :null => false
     t.text     "pre_content"
     t.text     "post_content"
     t.datetime "created_at",   :null => false
@@ -49,10 +49,13 @@ ActiveRecord::Schema.define(:version => 20120916085849) do
   add_index "tracs", ["topic_id"], :name => "index_tracs_on_topic_id"
 
   create_table "users", :force => true do |t|
-    t.string   "fb_id"
-    t.string   "name"
+    t.string   "fb_id",      :null => false
+    t.string   "name",       :null => false
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
+
+  add_index "users", ["fb_id"], :name => "index_users_on_fb_id", :unique => true
+  add_index "users", ["name"], :name => "index_users_on_name", :unique => true
 
 end

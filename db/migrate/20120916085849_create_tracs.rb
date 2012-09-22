@@ -2,8 +2,8 @@ class CreateTracs < ActiveRecord::Migration
   def change
     create_table :tracs do |t|
       t.references :topic
-      t.string :target
-      t.string :action
+      t.string :target, null: false
+      t.string :action, null: false
       t.text :pre_content
       t.text :post_content
 
