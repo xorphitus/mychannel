@@ -6,4 +6,4 @@ env:
 before_script:
   - "rake db:migrate:reset RAILS_ENV=test"
 script:
-  - script: "bundle exec rake travis"
+  - "bundle exec rake travis"
