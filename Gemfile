@@ -10,10 +10,10 @@ group :development do
 end
 
 # db
-group :development, :test do
+group :development do
    gem 'sqlite3'
 end
-group :production do
+group :production, :test do
   gem 'mysql2'
 end
 
@@ -30,7 +30,7 @@ gem 'twitter-bootstrap-rails'
 gem 'rails_config'
 gem 'romankana'
 
-# external web service
+# for external web service
 gem 'fb_graph'
 gem 'youtube_search'
 gem 'yacan'

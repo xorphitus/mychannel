@@ -3,4 +3,7 @@ rvm:
   - 1.9.3
 env:
   - DB=mysql
-script: "rake db:migrate:reset"
+before_script:
+  - "rake db:migrate:reset RAILS_ENV=test"
+script:
+  - script: "bundle exec rake travis"
