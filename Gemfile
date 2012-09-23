@@ -3,9 +3,13 @@ source 'https://rubygems.org'
 gem 'rails', '3.2.7'
 
 # test
-group :development do
+group :development, :test do
   gem 'rspec-rails', '~> 2.0'
   gem 'jasmine'
+end
+
+group :development do
+  gem 'spork'
   gem 'simplecov'
 end
 
