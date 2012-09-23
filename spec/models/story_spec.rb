@@ -2,7 +2,6 @@
 require 'spec_helper'
 
 describe Array do
-
   context "when empty" do
     subject { [].rand }
     it { should be_nil }
@@ -12,61 +11,66 @@ describe Array do
     subject { ["the only element"].rand }
     it { should == "the only element" }
   end
-
 end
 
 describe Story do
-
   before do
     class StringExt < String
       def method_missing(name, *args)
-        name.to_s
+        return StringExt.new(name.to_s)
+      end
+
+      # libraryの何者かがfromを定義しているようで期待通りの動作をしないので仕方なく
+      def from
+        return StringExt.new("from")
       end
     end
 
     class FbUserMock
       def method_missing(name, *args)
-        [StringExt.new(name.to_s)]
-      end
-      def message
-        "message"
+        return [StringExt.new(name.to_s)]
       end
     end
 
     yahoo = Settings.yahoo
     def yahoo.app_id
-      "app_id"
+      return "app_id"
     end
+
     module YaCan::Keyphrase
       def extract(str)
         extracted = Object.new
         def extracted.phrases
           ["keyphrase"]
         end
-        extracted
+        return extracted
       end
     end
 
     def YoutubeSearch.search(str)
-      [{"video_id" => "video_id"}]
+      return [{"video_id" => "video_id"}]
     end
 
     def open(uri)
-      "<foo></foo>"
+      return "<foo></foo>"
     end
+
     def SimpleRSS.parse(val)
       rss = Object.new
+
       def rss.entries
         entry = Object.new
+
         def entry.title
-          "hoge news"
+          return "hoge news"
         end
+
         def entry.link
-          "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001"
+          return "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001"
         end
-        [entry]
+        return [entry]
       end
-      rss
+      return rss
     end
   end
 
@@ -95,7 +99,6 @@ describe Story do
   end
 
   describe TracReader do
-
     describe "plane" do
       before(:each) do
         @reader = TracReader.new
@@ -134,7 +137,6 @@ describe Story do
         news.link.should == ["http://foo.com/bar.html?id=001"]
       end
     end
-
   end
 
   describe StructuredTrac do
@@ -171,7 +173,5 @@ describe Story do
         @trac.to_hash.should == {text: "t", link: "l", video: "v"}
       end
     end
-
   end
-
 end
