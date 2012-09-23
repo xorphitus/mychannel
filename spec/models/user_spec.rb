@@ -3,38 +3,52 @@ require 'spec_helper'
 describe User do
 
   describe "fb_id (means Facabook User ID)" do
-    it "can not be nil" do
-      user = User.new({name: "test"})
-      user.should_not be_valid
+    context "is nil" do
+      subject { User.new({name: "test"}) }
+      it { should_not be_valid }
     end
 
-    it "is unique" do
-      user1 = User.create({fb_id: "1", name: "test1"})
-      user2 = User.new({fb_id: "1", name: "test2"})
-      user2.should_not be_valid
+    context "is duplicated" do
+      before do
+        @user = User.create({fb_id: "1", name: "test1"})
+      end
+
+      subject { User.new({fb_id: "1", name: "test2"}) }
+      it { should_not be_valid }
+
+      after do
+        @user.destroy
+      end
     end
   end
 
-  describe "the name" do
-    it "is unique" do
-      user1 = User.create({fb_id: "1", name: "test"})
-      user2 = User.new({fb_id: "2", name: "test"})
-      user2.should_not be_valid
+  describe "name" do
+    context "is nil" do
+      subject { User.new({fb_id: "test"}) }
+      it { should_not be_valid }
     end
 
-    it "can not be nil" do
-      user = User.new({fb_id: "1"})
-      user.should_not be_valid
+    context "is duplicated" do
+      before do
+        @user = User.create({fb_id: "10", name: "test"})
+      end
+
+      subject { User.new({fb_id: "11", name: "test"}) }
+      it { should_not be_valid }
+
+      after do
+        @user.destroy
+      end
     end
 
-    it "can be less than 21 chars" do
-      user = User.new({fb_id: "1", name: "a" * 20})
-      user.should be_valid
+    context "has just 20 characters" do
+      subject { User.new({fb_id: "20", name: "a" * 20}) }
+      it { should be_valid }
     end
 
-    it "can be less than 20 chars" do
-      user = User.new({fb_id: "1", name: "a" * 21})
-      user.should_not be_valid
+    context "has more then 20 characters" do
+      subject { User.new({fb_id: "21", name: "a" * 21}) }
+      it { should_not be_valid }
     end
   end
 
