@@ -56,3 +56,20 @@ describe('linkDisplay', function () {
         });
     });
 });
+
+describe('channelSelector', function () {
+    describe('init', function () {
+        it('hides select box when it has only one option which has value' ,function () {
+            // TODO
+        });
+        it('shows select box when it has more than one option which has value' ,function () {
+            // TODO
+        });
+    });
+
+    describe('getId', function () {
+        it('returns the only channel id when it has only one option which has value' ,function () {
+            // TODO
+        });
+    });
+});

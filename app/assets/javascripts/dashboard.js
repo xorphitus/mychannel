@@ -60,13 +60,46 @@ var linkDisplay = (function () {
     };
 }());
 
+var channelSelector = (function () {
+    'use strict';
+
+    var CHANNEL_SELECTOR_ID = 'channel_selector',
+        RADIO_EXPLANATION_ID = 'radio_explanation',
+        selector,
+        displayFlag = false;
+
+    return {
+        init: function () {
+            var availabelOptionCount = 0;
+            selector = $('#' + CHANNEL_SELECTOR_ID);
+            selector.find('option').each(function () {
+                if (this.value) {
+                    availabelOptionCount += 1;
+                }
+            });
+            // TODO この辺のマジックナンバーっぷりがひどい
+            if( availabelOptionCount > 1) {
+                $('#' + RADIO_EXPLANATION_ID).fadeIn();
+                selector.fadeIn();
+                displayFlag = true;
+            }
+        },
+        getId: function () {
+            // TODO このif文が役に立ってない
+            if (displayFlag) {
+                return selector.val();
+            }
+            return 0;
+        }
+    };
+}());
+
 $(function () {
     'use strict';
 
     var LOADING_IMG_ID = 'loadingimg',
         TEXT_DISPLAY_ID = 'textdisplay',
         PLAY_BTN_ID = 'play_btn',
-        CHANNEL_SELECTOR_ID = 'channel_selector',
         WEBRIC_URI_MAX_LENGTH = 1000,
         READ_TEXT_MAX_LENGTH = 100,
         LOAD_INTERVAL_MILLIS = 3000,
@@ -123,17 +156,19 @@ $(function () {
         });
     };
 
+    channelSelector.init();
+
     $('#' + PLAY_BTN_ID).click(function () {
-        channelId = $('#' + CHANNEL_SELECTOR_ID).val();
-        if (channelId) {
+        channelId = channelSelector.getId();
+        if (isNaN(channelId)) {
+            alert('番組を選んで下さい');
+        } else {
             setInterval(function () {
                 if (queue.length < QUEUE_SIZE) {
                     loadData();
                 }
             }, LOAD_INTERVAL_MILLIS);
             exec();
-        } else {
-            alert('番組を選んで下さい');
         }
     });
 });
