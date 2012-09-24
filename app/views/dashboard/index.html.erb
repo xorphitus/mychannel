@@ -7,14 +7,14 @@
   <%= image_tag "ajaxindicator.gif", style: "display:none;", id: "loadingimg" %>
 </h1>
 
-<p>
+<p id="radio_explanation">
   番組を選ぶとラジオが放送されます
 </p>
 <p>
   <%= select_tag "", options_for_select(@channel_list), {id: "channel_selector", include_blank: true} %>
-  <a href="#" id="play_btn">
-    <i class="icon-play-circle"></i>&nbsp;GO
-  </a>
+  <button href="#" id="play_btn" class="btn">
+    <i class="icon-play-circle"></i>&nbsp;番組を聞く
+  </button>
 </p>
 
 <div class="row">
