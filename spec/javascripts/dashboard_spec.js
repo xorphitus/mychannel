@@ -36,7 +36,7 @@ describe('linkDisplay', function () {
 
             li0.append(icon0).append(a0);
             li1.append(icon1).append(a1);
-            expected =$('<div>').append(li0).append(li1).html();
+            expected =$('<div>').prepend(li0).prepend(li1).html();
 
             linkDisplay.add(links);
             expect($('#linkdisplay')).toHaveHtml(expected);

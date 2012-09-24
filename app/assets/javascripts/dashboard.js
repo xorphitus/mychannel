@@ -54,7 +54,7 @@ var linkDisplay = (function () {
                 }
                 a.text(text);
 
-                $('#' + LINK_DISPLAY_ID).append(li.append(icon).append(a));
+                $('#' + LINK_DISPLAY_ID).prepend(li.append(icon).append(a));
             });
         }
     };
