@@ -1,3 +1,8 @@
+<div class="alert alert-info">
+  お題の情報がFacebookから取得されるので話を膨らませて下さい。<br />
+  言葉をバトンリレーしながら関連するニュースや動画につなげたり、尾ひれをつけたりしましょう。
+</div>
+
 <table id="trac_list" class="table table-bordered table-condensed table-bordered table-hover">
   <%= form.fields_for :tracs do |f| %>
   <tr>
@@ -26,3 +31,7 @@
   </tr>
   <% end %>
 </table>
+<button type="button" id="trac_append_btn" class="btn btn-primary">話を膨らませる</button>
+<button type="button" id="cancel_trac_append_btn" class="btn btn-inverse">やっぱり膨らませない</button>
+<br />
+<br />

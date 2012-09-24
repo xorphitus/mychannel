@@ -1,6 +1,5 @@
 <%= form_for([@channel, @topic]) do |f| %>
 
-  <%# TODO この辺りがうまく機能していない様子 %>
   <% if @topic.errors.any? %>
     <div class="alert alert-error">
       <ul class="unstyled">

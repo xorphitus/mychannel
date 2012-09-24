@@ -22,18 +22,17 @@ class TopicsController < ApplicationController
   # POST /topics.json
   def create
     channel = Channel.find(params[:channel_id])
+    siblings = channel.topics
     @topic = channel.topics.build(params[:topic])
-    siblings= Topic.find_by_channel_id(params[:chennel_id])
     if siblings.nil?
-      @topic.order = 0
+      @topic.order = 1
     else
       @topic.order = siblings.size
     end
 
     respond_to do |format|
       if @topic.save
-        # TODO ここのnoticeが表示されるところがない
-        format.html { redirect_to action: :edit, id: @topic.id, notice: 'Topic was successfully created.' }
+        format.html { redirect_to action: :edit, id: @topic.id }
         format.json { render json: @topic, status: :created, location: @topic }
       else
         format.html { redirect_to action: :new, id: channel.id }
@@ -49,8 +48,9 @@ class TopicsController < ApplicationController
 
     respond_to do |format|
       if @topic.update_attributes(params[:topic])
-        # TODO ここのnoticeが表示されるところがない
-        format.html { render action: "edit", notice: "Topic was successfully updated." }
+        # TODO ここのnotice出ないです
+        #format.html { render action: :edit, notice: "話題を保存しました"  }
+        format.html { redirect_to action: :edit, id: @topic.id }
         format.json { head :no_content }
       else
         format.html { render action: "edit" }

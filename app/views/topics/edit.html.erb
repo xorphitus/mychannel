@@ -2,8 +2,15 @@
 <%= render partial: "edit/head_menu" %>
 <% end %>
 
+<%# TODO ここのnoticeが出ない %>
+<% unless notice.nil? %>
+<div class="alert alert-success">
+  <%= notice %>
+</div>
+<% end %>
+
 <h1>話題を編集する</h1>
 
 <%= render 'form' %>
 
-<%= link_to "戻る", @channel, class: "btn" %>
+<%= link_to "キャンセル", @channel, class: "btn" %>
