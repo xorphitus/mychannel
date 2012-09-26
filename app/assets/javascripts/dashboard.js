@@ -1,7 +1,9 @@
 /*global setInterval, alert, document, $, swfobject */
 
 var video = {},
-    onYouTubePlayerReady;
+    onYouTubePlayerReady,
+    linkDisplay,
+    channelSelector;
 
 video.ID = 'videoplayer';
 video.PLAYER_ID = 'mychannelVideoplayer';
@@ -36,9 +38,9 @@ onYouTubePlayerReady = function () {
     player.playVideo();
 };
 
-var linkDisplay = (function () {
+linkDisplay = (function () {
     'use strict';
-    var LINK_DISPLAY_ID = 'linkdisplay',
+    var LINK_DISPLAY_ID = 'link_display',
         LINK_TEXT_MAX_SIZE = 50;
 
     return {
@@ -60,41 +62,25 @@ var linkDisplay = (function () {
     };
 }());
 
-var channelSelector = (function () {
+channelSelector = (function () {
     'use strict';
 
-    var CHANNEL_SELECTOR_ID = 'channel_selector',
-        RADIO_EXPLANATION_ID = 'radio_explanation',
-        selector,
-        displayFlag = false;
+    var CHANNEL_SELECTOR_ID = 'channel_selector';
 
     return {
         init: function () {
-            var availabelOptionCount = 0;
-            selector = $('#' + CHANNEL_SELECTOR_ID);
-            selector.find('option').each(function () {
-                if (this.value) {
-                    availabelOptionCount += 1;
-                }
-            });
-            // TODO この辺のマジックナンバーっぷりがひどい
-            if( availabelOptionCount > 1) {
-                $('#' + RADIO_EXPLANATION_ID).fadeIn();
+            var selector = $('#' + CHANNEL_SELECTOR_ID);
+            if (selector.find('option').size()  > 1) {
                 selector.fadeIn();
-                displayFlag = true;
             }
         },
         getId: function () {
-            // TODO このif文が役に立ってない
-            if (displayFlag) {
-                return selector.val();
-            }
-            return 0;
+            return $('#' + CHANNEL_SELECTOR_ID).val();
         }
     };
 }());
 
-$(function () {
+(function () {
     'use strict';
 
     var LOADING_IMG_ID = 'loadingimg',
@@ -160,15 +146,15 @@ $(function () {
 
     $('#' + PLAY_BTN_ID).click(function () {
         channelId = channelSelector.getId();
-        if (isNaN(channelId)) {
-            alert('番組を選んで下さい');
-        } else {
+        if (channelId) {
             setInterval(function () {
                 if (queue.length < QUEUE_SIZE) {
                     loadData();
                 }
             }, LOAD_INTERVAL_MILLIS);
             exec();
+        } else {
+            alert('番組を選んで下さい');
         }
     });
-});
+}());

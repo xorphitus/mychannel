@@ -7,11 +7,8 @@
   <%= image_tag "ajaxindicator.gif", style: "display:none;", id: "loadingimg" %>
 </h1>
 
-<p id="radio_explanation">
-  番組を選ぶとラジオが放送されます
-</p>
 <p>
-  <%= select_tag "", options_for_select(@channel_list), {id: "channel_selector", include_blank: true} %>
+  <%= select_tag "", options_for_select(@channel_list), {id: "channel_selector", style: "display:none;"} %>
   <button href="#" id="play_btn" class="btn">
     <i class="icon-play-circle"></i>&nbsp;番組を聞く
   </button>
@@ -22,7 +19,7 @@
     <%= content_tag "audio", nil, {src: "/voice?text=ようこそ#{@me.name}さん", controls: true, autoplay: true} %>
     <pre class="prettyprint" id="textdisplay">
     </pre>
-    <ul id="linkdisplay" class="unstyled"></ul>
+    <ul id="link_display" class="unstyled"></ul>
   </div>
 
   <div id="videoplayer" style="display:none;" class="span5">

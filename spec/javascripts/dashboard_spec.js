@@ -1,5 +1,7 @@
 describe('linkDisplay', function () {
     describe('function "add"', function () {
+        var linkDisplayExpr = '#link_display';
+
         beforeEach(function () {
             loadFixtures('dashboard.html');
         });
@@ -14,7 +16,7 @@ describe('linkDisplay', function () {
                 expected =$('<div>').append(li.append(icon).append(a)).html();
 
             linkDisplay.add(links);
-            expect($('#linkdisplay')).toHaveHtml(expected);
+            expect($(linkDisplayExpr)).toHaveHtml(expected);
         });
 
         it('adds 2 links to a link display area', function () {
@@ -39,7 +41,7 @@ describe('linkDisplay', function () {
             expected =$('<div>').prepend(li0).prepend(li1).html();
 
             linkDisplay.add(links);
-            expect($('#linkdisplay')).toHaveHtml(expected);
+            expect($(linkDisplayExpr)).toHaveHtml(expected);
         });
 
         it('shortens a link text which has a too long charactors', function () {
@@ -52,24 +54,42 @@ describe('linkDisplay', function () {
                 expected =$('<div>').append(li.append(icon).append(a)).html();
 
             linkDisplay.add(links);
-            expect($('#linkdisplay')).toHaveHtml(expected);
+            expect($(linkDisplayExpr)).toHaveHtml(expected);
         });
     });
 });
 
 describe('channelSelector', function () {
+    var channelSelectorExpr = '#channel_selector';
+
+    beforeEach(function () {
+        loadFixtures('dashboard.html');
+    });
+
     describe('init', function () {
-        it('hides select box when it has only one option which has value' ,function () {
-            // TODO
+        it('hides select box when it has only one option' ,function () {
+            $(channelSelectorExpr).append('<option>');
+            channelSelector.init();
+            expect($(channelSelectorExpr)).toBeHidden();
         });
-        it('shows select box when it has more than one option which has value' ,function () {
-            // TODO
+        it('shows select box when it has more than one option' ,function () {
+            $(channelSelectorExpr).append('<option>').append('<option>');
+            channelSelector.init();
+            expect($(channelSelectorExpr)).toBeVisible();
         });
     });
 
     describe('getId', function () {
-        it('returns the only channel id when it has only one option which has value' ,function () {
-            // TODO
+        it('returns the only channel id when it has only one option' ,function () {
+            $(channelSelectorExpr).append('<option value="foo">');
+            expect(channelSelector.getId()).toBe('foo');
+        });
+        it('returns the chosen channel id when it has more than one optio' ,function () {
+            $(channelSelectorExpr)
+                .append('<option value="a">')
+                .append('<option value="b" selected>')
+                .append('<option value="c">');
+            expect(channelSelector.getId()).toBe('b');
         });
     });
 });
