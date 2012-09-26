@@ -11,8 +11,7 @@ class VoicesController < ApplicationController
       text = text[0, 97] + "以下略"
     end
 
-    voice = Net::HTTP.get "translate.google.co.jp", "/translate_tts?tl=ja&ie=utf-8&q=#{URI.encode text}"
-    send_data voice, type: "audio/mpeg"
+    send_data(Voice.get(text), type: Voice.content_type)
   end
 
 end
