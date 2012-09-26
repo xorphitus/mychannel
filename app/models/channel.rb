@@ -1,6 +1,6 @@
 class Channel < ActiveRecord::Base
   belongs_to :user
-  attr_accessible :description, :name, :publish_flag
+  attr_accessible :name, :publish_flag, :description
   has_many :topics, dependent: :destroy
 
   [:user_id, :name].each do |i|
