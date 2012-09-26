@@ -13,8 +13,13 @@ describe Array do
   end
 end
 
+# このスコープで再定義しないとダメみたい なぜだ beforeで書きたいのに
+def open(uri)
+  return "<foo></foo>"
+end
+
 describe Story do
-  before do
+  before(:each) do
     class StringExt < String
       def method_missing(name, *args)
         return StringExt.new(name.to_s)
@@ -49,10 +54,6 @@ describe Story do
 
     def YoutubeSearch.search(str)
       return [{"video_id" => "video_id"}]
-    end
-
-    def open(uri)
-      return "<foo></foo>"
     end
 
     def SimpleRSS.parse(val)

@@ -81,7 +81,7 @@ class Story
 
     tracs.each do |trac|
       trac_target = trac.target
-      unless trac_target == "prev" then
+      if trac_target != "prev" || inherited_value.nil? then
         recv = fb_target
         trac_target.split(".").each do |i|
           recv = recv.send(i.to_sym)
