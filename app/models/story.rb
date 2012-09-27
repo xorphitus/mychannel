@@ -14,50 +14,17 @@ class Array
   end
 end
 
-class TracParseException < Exception; end
-
 # View層のラジオプレイヤーに読ませるJSONデータを生成する
 class Story
-
-  # デフォルトの音声コンテンツを返す
-  # TODO YAMLとかに外出しした方がいいんだろうか
-  def self.get_default_topics
-    topic1 = Topic.new(target: "feed")
-    trac1_1 = Trac.new(target: "message", action: "plane", pre_content: "あなたの投稿 ", post_content: "")
-    trac1_2 = Trac.new(target: "prev", action: "keyword", pre_content: "「", post_content: "」といえば")
-    trac1_3 = Trac.new(target: "prev", action: "relation", pre_content: "「", post_content: "」ですが")
-    trac1_4 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
-    topic1.tracs = [trac1_1, trac1_2, trac1_3, trac1_4]
-
-    topic2 = Topic.new(target: "home")
-    trac2_1 = Trac.new(target: "from.name", action: "plane", pre_content: "", post_content: "さんからの投稿")
-    trac2_2 = Trac.new(target: "message", action: "plane", pre_content: "", post_content: "")
-    trac2_3 = Trac.new(target: "prev", action: "keyword", pre_content: "「", post_content: "」といえば")
-    trac2_4 = Trac.new(target: "prev", action: "news", pre_content: "", post_content: " というニュースがあります")
-    topic2.tracs = [trac2_1, trac2_2, trac2_3, trac2_4]
-
-    topic3 = Topic.new(target: "music")
-    trac3_1 = Trac.new(target: "name", action: "plane", pre_content: "あなたのお気に入り ", post_content: "にちなんだ一曲をどうぞ")
-    trac3_2 = Trac.new(target: "prev", action: "youtube", pre_content: "", post_content: "")
-    topic3.tracs = [trac3_1, trac3_2]
-
-    return [topic1, topic2, topic3]
-  end
-
-  # 音声コンテンツのJSONデータ (未シリアライズ) を返す
   def self.get(me, channel_id)
-    if channel_id.nil? then
-      topics = Story.get_default_topics
+    # TODO inner join!
+    channel = Channel.find_by_id(channel_id)
+    if channel.nil?
+      # TODO
     else
-      # TODO inner join!
-      channel = Channel.find_by_id(channel_id)
-      if channel.nil?
-        topics = Story.get_default_topics
-      else
-        topics = channel.topics
-        if topics.nil? then
-          return [({text: "この番組は作りかけなので、他の番組を選んで下さい"})]
-        end
+      topics = channel.topics
+      if topics.empty?
+        # TODO
       end
     end
 
@@ -69,7 +36,7 @@ class Story
       # TODO 自分のポストは除去する
       fb_targets.select! { |item| !item.message.nil? }
     end
-    if fb_targets.nil? then
+    if fb_targets.nil?
       return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
     end
 
@@ -81,15 +48,17 @@ class Story
 
     tracs.each do |trac|
       trac_target = trac.target
-      if trac_target != "prev" || inherited_value.nil? then
-        recv = fb_target
+      if trac_target == "prev"
+        value = inherited_value
+      else
+        value = fb_target
         trac_target.split(".").each do |i|
-          recv = recv.send(i.to_sym)
+          value = value.send(i.to_sym)
         end
-        inherited_value = recv
+        inherited_value = value
       end
 
-      structured_trac = trac_reader.send(trac.action.to_sym, inherited_value)
+      structured_trac = trac_reader.send(trac.action.to_sym, value)
       json_elem = structured_trac.to_hash
       if structured_trac.text_decoration_flag
         if structured_trac.inheritance_flag
@@ -107,10 +76,12 @@ end
 # TracをブラウザのハンドリングできるJSON形式に変換する前段階の構造
 class StructuredTrac
   attr_accessor :text, :link, :video, :text_decoration_flag, :inheritance_flag
+
   def initialize
     self.text_decoration_flag = true
     self.inheritance_flag = true
   end
+
   def to_hash
     hash = {}
     [:text, :link, :video].each do |attr|
@@ -176,7 +147,7 @@ class TracReader
     result = StructuredTrac.new
     rss = SimpleRSS.parse(open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode(val)}&lr&output=atom&num=5&hl=ja"))
     news = rss.entries.rand
-    if news.nil? then
+    if news.nil?
       result.text = "関連ニュースはないみたいです"
       result.text_decoration_flag = false
       return result

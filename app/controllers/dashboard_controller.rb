@@ -5,7 +5,7 @@ class DashboardController < ApplicationController
   def index
     @me = get_fb_me
     channels = Channel.find(:all, conditions: {publish_flag: true})
-    @channel_list = [["サンプル", 0]]
+    @channel_list = []
     channels.each do |channel|
       @channel_list.push([channel.name, channel.id])
     end

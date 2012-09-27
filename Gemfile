@@ -5,6 +5,7 @@ gem 'rails', '3.2.7'
 # test
 group :development, :test do
   gem 'rspec-rails', '~> 2.0'
+  gem 'fabrication'
   gem 'jasmine'
 end
 

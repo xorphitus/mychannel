@@ -43,7 +43,7 @@ describe Story do
     end
 
     module YaCan::Keyphrase
-      def extract(str)
+      def self.extract(str)
         extracted = Object.new
         def extracted.phrases
           ["keyphrase"]
@@ -75,21 +75,19 @@ describe Story do
     end
   end
 
-  describe "get_default_topics" do
-    it "returns an array which has some Topics" do
-      topics = Story.get_default_topics
-
-      topics.class.should == Array
-      topics.should have_at_least(1).items
-      topics.each do |topic|
-        topic.class.should == Topic
-      end
-    end
-  end
-
   describe "get" do
+    before do
+      user = Fabricate(:user)
+      @channel = Fabricate(:channel, user: user)
+      topic = Fabricate(:topic, channel: @channel)
+      Fabricate(:trac01, topic: topic)
+      Fabricate(:trac02, topic: topic)
+      Fabricate(:trac03, topic: topic)
+      Fabricate(:trac04, topic: topic)
+    end
+
     it "returns an array which has some Hashes" do
-      json = Story.get(FbUserMock.new, nil)
+      json = Story.get(FbUserMock.new, @channel.id)
 
       json.class.should == Array
       json.should have_at_least(1).items
