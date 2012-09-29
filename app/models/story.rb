@@ -17,48 +17,40 @@ end
 # View層のラジオプレイヤーに読ませるJSONデータを生成する
 class Story
   def self.get(me, channel_id)
-    # TODO inner join!
-    channel = Channel.find_by_id(channel_id)
-    if channel.nil?
-      # TODO
-    else
-      topics = channel.topics
-      if topics.empty?
-        # TODO
-      end
+    topics = Topic.where(channel_id: channel_id)
+    if topics.empty?
+      # TODO DBにレコードがなければエラー
     end
 
     topic = topics.rand
     tracs = topic.tracs
+    if tracs.empty?
+      # TODO DBにレコードがなければエラー
+    end
 
     fb_targets = me.send(topic.target.to_sym)
     if topic.target == "home" || topic.target == "feed"
-      # TODO 自分のポストは除去する
-      fb_targets.select! { |item| !item.message.nil? }
+      fb_targets.reject! { |i| i.message.nil? }
     end
     if fb_targets.nil?
       return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
     end
 
     result_json_array = []
-    fb_target = fb_targets.rand
 
     inherited_value = nil
     trac_reader = TracReader.new
 
     tracs.each do |trac|
-      trac_target = trac.target
-      if trac_target == "prev"
-        value = inherited_value
+      if trac.target == "prev"
+        fb_target = inherited_value
       else
-        value = fb_target
-        trac_target.split(".").each do |i|
-          value = value.send(i.to_sym)
-        end
-        inherited_value = value
+        fb_target = fb_targets.rand
+        trac.target.split(".").each { |i| fb_target = fb_target.send(i.to_sym) }
+        inherited_value = fb_target
       end
 
-      structured_trac = trac_reader.send(trac.action.to_sym, value)
+      structured_trac = trac_reader.send(trac.action.to_sym, fb_target)
       json_elem = structured_trac.to_hash
       if structured_trac.text_decoration_flag
         if structured_trac.inheritance_flag
