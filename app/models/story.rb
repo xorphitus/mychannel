@@ -25,7 +25,7 @@ class Story
       return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
     end
 
-    result_json_array = []
+    content_array = []
 
     inherited_value = nil
     trac_reader = TracReader.new
@@ -47,10 +47,10 @@ class Story
         end
         json_elem[:text] = "#{trac.pre_content}#{inherited_value}#{trac.post_content}"
       end
-      result_json_array.push(json_elem)
+      content_array.push(json_elem)
     end
 
-    return result_json_array
+    return {metadata: {hash: content_array.hash}, content: content_array}
   end
 end
 

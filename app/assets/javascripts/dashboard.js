@@ -91,6 +91,7 @@ channelSelector = (function () {
         LOAD_INTERVAL_MILLIS = 3000,
         QUEUE_SIZE = 3,
         queue = [],
+        prevStoryHash,
         exec,
         loadData,
         channelId;
@@ -134,10 +135,19 @@ channelSelector = (function () {
     loadData = function (callback) {
         $('#' + LOADING_IMG_ID).show();
         $.get('/story?channel_id=' + channelId, function (data) {
-            queue = queue.concat(data);
-            $('#' + LOADING_IMG_ID).hide();
-            if (typeof callback === 'function') {
-                callback();
+            if (data.metadata.hash === prevStoryHash) {
+                // 2回連続で同じstoryを再生しないためのチェック機構
+                if (typeof callback === 'function') {
+                    loadData(callback);
+                }
+            } else {
+                queue = queue.concat(data.content);
+                prevStoryHash = data.metadata.hash;
+
+                $('#' + LOADING_IMG_ID).hide();
+                if (typeof callback === 'function') {
+                    callback();
+                }
             }
         });
     };
