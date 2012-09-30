@@ -82,7 +82,7 @@ describe Story do
         json = Story.get(FbMock.new, @channel.id)
 
         json.class.should == Array
-        json.should have_at_least(1).items
+        json.should have(4).items
         json.each do |item|
           item.class.should == Hash
         end
