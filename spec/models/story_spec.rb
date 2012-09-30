@@ -1,39 +1,30 @@
 # -*- coding: utf-8 -*-
 require 'spec_helper'
 
-describe Array do
-  context "when empty" do
-    subject { [].rand }
-    it { should be_nil }
-  end
-
-  context "when an Array has just one element" do
-    subject { ["the only element"].rand }
-    it { should == "the only element" }
-  end
-end
-
 # このスコープで再定義しないとダメみたい なぜだ beforeで書きたいのに
 def open(uri)
   return "<foo></foo>"
 end
 
 describe Story do
-  before(:each) do
-    class StringExt < String
-      def method_missing(name, *args)
-        return StringExt.new(name.to_s)
+  before do
+    class FbMock
+      class MessageMock
+        def initialize(msg)
+          @msg = msg
+        end
+
+        def message
+          return @msg
+        end
       end
 
-      # libraryの何者かがfromを定義しているようで期待通りの動作をしないので仕方なく
-      def from
-        return StringExt.new("from")
+      def home
+        return [MessageMock.new("home")]
       end
-    end
 
-    class FbUserMock
-      def method_missing(name, *args)
-        return [StringExt.new(name.to_s)]
+      def feed
+        return [MessageMock.new("feed")]
       end
     end
 
@@ -76,24 +67,46 @@ describe Story do
   end
 
   describe "get" do
-    before do
-      user = Fabricate(:user)
-      @channel = Fabricate(:channel, user: user)
-      topic = Fabricate(:topic, channel: @channel)
-      Fabricate(:trac01, topic: topic)
-      Fabricate(:trac02, topic: topic)
-      Fabricate(:trac03, topic: topic)
-      Fabricate(:trac04, topic: topic)
+    context "with a right channel_id" do
+      before do
+        user = Fabricate(:user)
+        @channel = Fabricate(:channel, user: user)
+        topic = Fabricate(:topic, channel: @channel)
+        Fabricate(:trac01, topic: topic)
+        Fabricate(:trac02, topic: topic)
+        Fabricate(:trac03, topic: topic)
+        Fabricate(:trac04, topic: topic)
+      end
+
+      it "returns an array which has some Hashes" do
+        json = Story.get(FbMock.new, @channel.id)
+
+        json.class.should == Array
+        json.should have_at_least(1).items
+        json.each do |item|
+          item.class.should == Hash
+        end
+      end
     end
 
-    it "returns an array which has some Hashes" do
-      json = Story.get(FbUserMock.new, @channel.id)
-
-      json.class.should == Array
-      json.should have_at_least(1).items
-      json.each do |item|
-        item.class.should == Hash
+    context "with a wrong channel_id" do
+      before do
+        @undefined_channel_id = 1
       end
+
+      subject { lambda { Story.get(FbMock.new, @undefined_channel_id) } }
+      it { should raise_error }
+    end
+
+    context "with a channel_id which has no tracs" do
+      before do
+        user = Fabricate(:user)
+        @channel = Fabricate(:channel, user: user)
+        topic = Fabricate(:topic, channel: @channel)
+      end
+
+      subject { lambda { Story.get(FbMock.new, @channel.id) } }
+      it { should raise_error }
     end
   end
 

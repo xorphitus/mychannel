@@ -3,33 +3,22 @@ require "nokogiri"
 require "open-uri"
 require "cgi"
 
-# Arrayにrandメソッドを追加
-class Array
-  # get randan element of array
-  def rand
-    if self.empty?
-      return nil
-    end
-    return self[Kernel::rand self.length]
-  end
-end
-
 # View層のラジオプレイヤーに読ませるJSONデータを生成する
 class Story
   def self.get(me, channel_id)
     topics = Topic.where(channel_id: channel_id)
     if topics.empty?
-      # TODO DBにレコードがなければエラー
+      raise "Could not find any topics for channel_id = #{channel_id}"
     end
 
-    topic = topics.rand
+    topic = topics.sample
     tracs = topic.tracs
     if tracs.empty?
-      # TODO DBにレコードがなければエラー
+      raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}"
     end
 
     fb_targets = me.send(topic.target.to_sym)
-    if topic.target == "home" || topic.target == "feed"
+    if ["home", "feed"].include?(topic.target)
       fb_targets.reject! { |i| i.message.nil? }
     end
     if fb_targets.nil?
@@ -45,7 +34,7 @@ class Story
       if trac.target == "prev"
         fb_target = inherited_value
       else
-        fb_target = fb_targets.rand
+        fb_target = fb_targets.sample
         trac.target.split(".").each { |i| fb_target = fb_target.send(i.to_sym) }
         inherited_value = fb_target
       end
@@ -105,7 +94,7 @@ class TracReader
   def keyword val
     result = StructuredTrac.new
     YaCan.appid = Settings.yahoo.app_id
-    result.text = YaCan::Keyphrase.extract(val).phrases.rand
+    result.text = YaCan::Keyphrase.extract(val).phrases.sample
 
     return result
   end
@@ -122,13 +111,13 @@ class TracReader
       result.inheritance_flag = false
       result.text_decoration_flag = false
     else
-      relational_words = targets.rand.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
+      relational_words = targets.sample.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
       if relational_words.empty?
         result.text = "とくに連想するものはありませんが"
         result.inheritance_flag = false
         result.text_decoration_flag = false
       else
-        result.text = relational_words.rand
+        result.text = relational_words.sample
       end
     end
 
@@ -138,7 +127,7 @@ class TracReader
   def news val
     result = StructuredTrac.new
     rss = SimpleRSS.parse(open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode(val)}&lr&output=atom&num=5&hl=ja"))
-    news = rss.entries.rand
+    news = rss.entries.sample
     if news.nil?
       result.text = "関連ニュースはないみたいです"
       result.text_decoration_flag = false
@@ -157,7 +146,7 @@ class TracReader
 
   def youtube val
     result = StructuredTrac.new
-    video_obj = YoutubeSearch.search(val).rand
+    video_obj = YoutubeSearch.search(val).sample
     result.video = [{url: "http://youtube.com/v/" + video_obj["video_id"], name: video_obj["name"]}]
 
     return result
