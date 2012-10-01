@@ -16,7 +16,7 @@
 
 <div class="row">
   <div class="span5">
-    <%= content_tag "audio", nil, {src: "/voice?text=ようこそ#{@me.name}さん", controls: true, autoplay: true} %>
+    <%= content_tag "audio", nil, {src: URI.encode("/voice?text=ようこそ#{@me.name}さん"), controls: true, autoplay: true} %>
     <pre class="prettyprint" id="textdisplay">
     </pre>
     <ul id="link_display" class="unstyled"></ul>
@@ -32,4 +32,14 @@
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
 <script>
   google.load("swfobject", "2.2");
+</script>
+
+<%= javascript_include_tag "audio.min.js" %>
+<script>
+  if (!navigator.userAgent.match(/AppleWebKit/)) {
+    audiojs.events.ready(function() {
+      var as = audiojs.createAll();
+    });
+    alert('ごめんなさい. 現在Google ChromeとSafari以外のブラウザでは視聴できないです. もう少々お待ち下さい.');
+  }
 </script>
