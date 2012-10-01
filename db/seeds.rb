@@ -7,6 +7,8 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
+# clean up
+User.find(:all).each { |user| user.destroy }
 
 user = User.create({fb_id: "1", name: "admin"})
 

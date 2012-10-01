@@ -12,7 +12,8 @@ class Story
     end
 
     topic = topics.sample
-    tracs = topic.tracs
+    # productionのMySQLだと想定の順序になってくれないのでひとまずidでorder
+    tracs = topic.tracs.order(:id)
     if tracs.empty?
       raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}"
     end
@@ -25,21 +26,21 @@ class Story
       return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
     end
 
+    fb_target = fb_targets.sample
     content_array = []
-
     inherited_value = nil
     trac_reader = TracReader.new
 
     tracs.each do |trac|
       if trac.target == "prev"
-        fb_target = inherited_value
+        seed = inherited_value
       else
-        fb_target = fb_targets.sample
-        trac.target.split(".").each { |i| fb_target = fb_target.send(i.to_sym) }
-        inherited_value = fb_target
+        seed = fb_target
+        trac.target.split(".").each { |i| seed = seed.send(i.to_sym) }
+        inherited_value = seed
       end
 
-      structured_trac = trac_reader.send(trac.action.to_sym, fb_target)
+      structured_trac = trac_reader.send(trac.action.to_sym, seed)
       json_elem = structured_trac.to_hash
       if structured_trac.text_decoration_flag
         if structured_trac.inheritance_flag

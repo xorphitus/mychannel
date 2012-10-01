@@ -3,13 +3,23 @@ require 'spec_helper'
 
 # このスコープで再定義しないとダメみたい なぜだ beforeで書きたいのに
 def open(uri)
-  return "<foo></foo>"
+  return "<Result>__relation__</Result>"
 end
 
 describe Story do
   before do
     class FbMock
       class MessageMock
+        class FromMock
+          def initialize(name)
+            @name = name
+          end
+
+          def name
+            return @name
+          end
+        end
+
         def initialize(msg)
           @msg = msg
         end
@@ -17,14 +27,18 @@ describe Story do
         def message
           return @msg
         end
+
+        def from
+          return FromMock.new("__from.name__")
+        end
       end
 
       def home
-        return [MessageMock.new("home")]
+        return [MessageMock.new("__home_message__")]
       end
 
       def feed
-        return [MessageMock.new("feed")]
+        return [MessageMock.new("__feed_message__")]
       end
     end
 
@@ -37,14 +51,14 @@ describe Story do
       def self.extract(str)
         extracted = Object.new
         def extracted.phrases
-          ["keyphrase"]
+          ["__keyphrase__"]
         end
         return extracted
       end
     end
 
     def YoutubeSearch.search(str)
-      return [{"video_id" => "video_id"}]
+      return [{"video_id" => "__video_id__"}]
     end
 
     def SimpleRSS.parse(val)
@@ -54,7 +68,7 @@ describe Story do
         entry = Object.new
 
         def entry.title
-          return "hoge news"
+          return "__news__"
         end
 
         def entry.link
@@ -67,15 +81,15 @@ describe Story do
   end
 
   describe "get" do
-    context "with a right channel_id" do
+    context "with a right channel_id which contains a topic about 'feed'" do
       before do
         user = Fabricate(:user)
         @channel = Fabricate(:channel, user: user)
-        topic = Fabricate(:topic, channel: @channel)
+        topic = Fabricate(:topic00, channel: @channel)
+        Fabricate(:trac00, topic: topic)
         Fabricate(:trac01, topic: topic)
         Fabricate(:trac02, topic: topic)
         Fabricate(:trac03, topic: topic)
-        Fabricate(:trac04, topic: topic)
       end
 
       it "returns an array which has some Hashes" do
@@ -86,17 +100,44 @@ describe Story do
         json[:metadata].should_not be_nil
         json[:metadata][:hash].should_not be_nil
 
-        json[:content].class.should == Array
-        json[:content].should have(4).items
-        json[:content].each do |item|
-          item.class.should == Hash
-        end
+        contents = json[:content]
+        contents.class.should == Array
+        contents.should have(4).items
 
-        # json.class.should == Array
-        # json.should have(4).items
-        # json.each do |item|
-        #   item.class.should == Hash
-        # end
+        contents[0][:text].should == "pre __feed_message__ post"
+        contents[1][:text].should == "pre __keyphrase__ post"
+        contents[2][:text].should == "pre __relation__ post"
+        contents[3][:text].should == "pre __news__ post"
+      end
+    end
+
+    context "with a right channel_id which contains a topic about 'home'" do
+      before do
+        user = Fabricate(:user)
+        @channel = Fabricate(:channel, user: user)
+        topic = Fabricate(:topic01, channel: @channel)
+        Fabricate(:trac10, topic: topic)
+        Fabricate(:trac11, topic: topic)
+        Fabricate(:trac12, topic: topic)
+        Fabricate(:trac13, topic: topic)
+      end
+
+      it "returns an array which has some Hashes" do
+        json = Story.get(FbMock.new, @channel.id)
+
+        json.class.should == Hash
+
+        json[:metadata].should_not be_nil
+        json[:metadata][:hash].should_not be_nil
+
+        contents = json[:content]
+        contents.class.should == Array
+        contents.should have(4).items
+
+        contents[0][:text].should == "pre __from.name__ post"
+        contents[1][:text].should == "pre __home_message__ post"
+        contents[2][:text].should == "pre __keyphrase__ post"
+        contents[3][:text].should == "pre __news__ post"
       end
     end
 
@@ -113,7 +154,7 @@ describe Story do
       before do
         user = Fabricate(:user)
         @channel = Fabricate(:channel, user: user)
-        topic = Fabricate(:topic, channel: @channel)
+        topic = Fabricate(:topic00, channel: @channel)
       end
 
       subject { lambda { Story.get(FbMock.new, @channel.id) } }
