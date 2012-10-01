@@ -86,7 +86,7 @@ channelSelector = (function () {
     var LOADING_IMG_ID = 'loadingimg',
         TEXT_DISPLAY_ID = 'textdisplay',
         PLAY_BTN_ID = 'play_btn',
-        WEBRIC_URI_MAX_LENGTH = 1000,
+        WEBRIC_URL_MAX_LENGTH = 1000,
         READ_TEXT_MAX_LENGTH = 100,
         LOAD_INTERVAL_MILLIS = 3000,
         QUEUE_SIZE = 3,
@@ -110,7 +110,7 @@ channelSelector = (function () {
         if (target.text) {
             $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast');
             encodedText = encodeURIComponent(target.text);
-            if (encodedText.length > WEBRIC_URI_MAX_LENGTH) {
+            if (encodedText.length > WEBRIC_URL_MAX_LENGTH) {
                 encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH));
             }
             $('audio:first').attr('src', '/voice?text=' + encodedText).bind('ended', function () {

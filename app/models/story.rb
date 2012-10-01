@@ -80,11 +80,11 @@ class TracReader
   def plane val
     result = StructuredTrac.new
     result.text = val
-    uris = URI.extract(val)
-    unless uris.empty?
-      result.link = uris
-      uris.each do |uri|
-        result.text.gsub!(uri, "")
+    urls = URI.extract(val).select { |uri| uri.match(/^(https?|ftp)/) }
+    unless urls.empty?
+      result.link = urls
+      urls.each do |url|
+        result.text.gsub!(url, "")
       end
     end
 
