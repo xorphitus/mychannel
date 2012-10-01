@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# controllerでincludeするとFacebookログインしないとアクセスできないリソースになる
 module Authentication
   def self.included base
     base.before_filter :require_authentication
@@ -14,8 +16,8 @@ module Authentication
     end
   end
 
+  # Facebookからログインユーザの情報を取得
   def get_fb_me
-    # TODO これが重そうなので5分キャッシュとかしよう
     FbGraphExtension::User.me(@access_token).fetch
   end
 end
