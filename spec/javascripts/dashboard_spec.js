@@ -66,19 +66,6 @@ describe('channelSelector', function () {
         loadFixtures('dashboard.html');
     });
 
-    describe('init', function () {
-        it('hides select box when it has only one option' ,function () {
-            $(channelSelectorExpr).append('<option>');
-            channelSelector.init();
-            expect($(channelSelectorExpr)).toBeHidden();
-        });
-        it('shows select box when it has more than one option' ,function () {
-            $(channelSelectorExpr).append('<option>').append('<option>');
-            channelSelector.init();
-            expect($(channelSelectorExpr)).toBeVisible();
-        });
-    });
-
     describe('getId', function () {
         it('returns the only channel id when it has only one option' ,function () {
             $(channelSelectorExpr).append('<option value="foo">');
@@ -93,3 +80,26 @@ describe('channelSelector', function () {
         });
     });
 });
+
+// TODO 何故かfixtureを読み込んでも<audio>のDOMが作られない様子
+// describe('audioPlayer', function () {
+//     beforeEach(function () {
+//         loadFixtures('dashboard.html');
+//     });
+
+//     describe('play', function () {
+//         it('sets a sound source', function () {
+//             var input = 'hoge';
+//             audio.play(input);
+//             expect($('audio:first').attr('src')).toBe(input);
+//         });
+
+//         it('sets an callback called when the player finished playing a sound', function () {
+//             var value = false;
+//             audio.play('hoge', function () {
+//                 value = true;
+//             });
+//             expect(value).toBe(true);
+//         });
+//     });
+// });

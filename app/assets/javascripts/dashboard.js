@@ -1,13 +1,14 @@
-/*global setInterval, alert, document, $, swfobject */
+/*global setInterval, alert, document, $, swfobject, audiojs */
 
 var video = {},
+    audio,
     onYouTubePlayerReady,
     linkDisplay,
     channelSelector;
 
 video.ID = 'videoplayer';
 video.PLAYER_ID = 'mychannelVideoplayer';
-video.set = function (url, callback) {
+video.play = function (url, callback) {
     'use strict';
     var player = document.getElementById(video.PLAYER_ID),
         params = { allowScriptAccess: "always" },
@@ -65,17 +66,39 @@ linkDisplay = (function () {
 channelSelector = (function () {
     'use strict';
 
-    var CHANNEL_SELECTOR_ID = 'channel_selector';
+    var CHANNEL_SELECTOR_ID = 'channel_selector',
+        selector = $('#' + CHANNEL_SELECTOR_ID);
+    if (selector.find('option').size() > 1) {
+        selector.fadeIn();
+    }
 
     return {
-        init: function () {
-            var selector = $('#' + CHANNEL_SELECTOR_ID);
-            if (selector.find('option').size()  > 1) {
-                selector.fadeIn();
-            }
-        },
         getId: function () {
             return $('#' + CHANNEL_SELECTOR_ID).val();
+        }
+    };
+}());
+
+audio = (function () {
+    'use strict';
+
+    var audio = $('audio:first'),
+        audioObj = audio.get(0),
+        AUDIO_CONTENT_TYPE = 'audio/mpeg';
+
+    if (typeof audioObj.canPlayType !== 'function' || !audioObj.canPlayType(AUDIO_CONTENT_TYPE)) {
+        audiojs.events.ready(function () {
+            var as = audiojs.createAll();
+        });
+        alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい.');
+    }
+
+    return {
+        play: function (src, callback) {
+            audio.attr('src', src).bind('ended', function () {
+                audio.unbind('ended');
+                callback();
+            });
         }
     };
 }());
@@ -113,8 +136,7 @@ channelSelector = (function () {
             if (encodedText.length > WEBRIC_URL_MAX_LENGTH) {
                 encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH));
             }
-            $('audio:first').attr('src', '/voice?text=' + encodedText).bind('ended', function () {
-                $(this).unbind('ended');
+            audio.play('/voice?text=' + encodedText, function () {
                 exec(queue.shift());
             });
             if (target.link) {
@@ -122,7 +144,7 @@ channelSelector = (function () {
             }
         } else if (target.video) {
             $('#' + video.ID).slideDown();
-            video.set(target.video[0].url, function () {
+            video.play(target.video[0].url, function () {
                 // TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
                 // $('#' + video.ID).slideUp();
                 exec(queue.shift());
@@ -151,8 +173,6 @@ channelSelector = (function () {
             }
         });
     };
-
-    channelSelector.init();
 
     $('#' + PLAY_BTN_ID).click(function () {
         channelId = channelSelector.getId();

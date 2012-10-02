@@ -35,11 +35,3 @@
 </script>
 
 <%= javascript_include_tag "audio.min.js" %>
-<script>
-  if (!navigator.userAgent.match(/(AppleWebKit|MSIE\s9\.|MSIE\s10\.)/)) {
-    audiojs.events.ready(function() {
-      var as = audiojs.createAll();
-    });
-    alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい.');
-  }
-</script>
