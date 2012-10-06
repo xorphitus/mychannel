@@ -1,0 +1,17 @@
+.hero-unit
+  %h1 まいちゃんねるにようこそ
+  %p 完全パーソナライズドなラジオ (プラス、視覚要素を少々) をお届け
+  %p
+    %small
+      ※1. ログインすると音声が流れます
+      %br/
+      ※2. 萌え萌えマスコットキャラクター「まいちゃん」等の類はご用意しておりません
+  %fb:login-button{:length => "long", :onlogin => "location.href = '#{dashboard_path}'", :scope => "user_about_me,read_stream"}
+%script{:src => "http://connect.facebook.net/ja_JP/all.js"}
+:javascript
+  FB.init({
+    appId: '#{Settings.fb.app_id}',
+    cookie: true,
+    xfbml: true,
+    oauth: true
+  });

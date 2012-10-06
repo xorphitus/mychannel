@@ -1,0 +1,23 @@
+- content_for :head do
+  = render partial: "head_menu"
+%h1
+  あなたのFacebookから作った番組
+  \#{image_tag "ajaxindicator.gif", style: "display:none;", id: "loadingimg"}
+%p
+  = select_tag "", options_for_select(@channel_list), {id: "channel_selector", style: "display:none;"}
+  %button#play_btn.btn{:href => "#"}
+    %i.icon-play-circle>
+    \&nbsp;番組を聞く
+.row
+  .span5
+    = content_tag "audio", nil, {src: URI.encode("/voice?text=ようこそ#{@me.name}さん"), controls: true, autoplay: true}
+    %pre#textdisplay.prettyprint
+      :preserve
+    %ul#link_display.unstyled
+  #videoplayer.span5{:style => "display:none;"}
+    #videoplayerTarget
+      Flash player 8+ と JavaScriptの有効化が必要でございますよ
+%script{:src => "http://www.google.com/jsapi", :type => "text/javascript"}
+:javascript
+  google.load("swfobject", "2.2");
+= javascript_include_tag "audio.min.js"

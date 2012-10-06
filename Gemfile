@@ -29,6 +29,10 @@ group :production, :test do
   gem 'mysql2'
 end
 
+# view
+gem 'haml'
+gem 'haml-rails'
+
 # assets
 group :assets do
   gem 'coffee-rails', '~> 3.2.1'
