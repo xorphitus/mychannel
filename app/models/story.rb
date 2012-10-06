@@ -22,7 +22,7 @@ class Story
           hash[attr] = value
         end
       end
-      return hash
+      hash
     end
   end
 
@@ -39,7 +39,7 @@ class Story
         end
       end
 
-      return result
+      result
     end
 
     def keyword val
@@ -47,7 +47,7 @@ class Story
       YaCan.appid = Settings.yahoo.app_id
       result.text = YaCan::Keyphrase.extract(val).phrases.sample
 
-      return result
+      result
     end
 
     def relation val
@@ -72,7 +72,7 @@ class Story
         end
       end
 
-      return result
+      result
     end
 
     def news val
@@ -92,7 +92,7 @@ class Story
       link = URI.decode(link)
       result.link = [link]
 
-      return result
+      result
     end
 
     def youtube val
@@ -100,7 +100,7 @@ class Story
       video_obj = YoutubeSearch.search(val).sample
       result.video = [{url: "http://youtube.com/v/" + video_obj["video_id"], name: video_obj["name"]}]
 
-      return result
+      result
     end
   end
 
@@ -151,6 +151,6 @@ class Story
       content_array.push(json_elem)
     end
 
-    return {metadata: {hash: content_array.hash}, content: content_array}
+    {metadata: {hash: content_array.hash}, content: content_array}
   end
 end

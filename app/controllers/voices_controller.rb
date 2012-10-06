@@ -11,7 +11,7 @@ class String
       end
     end
 
-    return self
+    self
   end
 end
 

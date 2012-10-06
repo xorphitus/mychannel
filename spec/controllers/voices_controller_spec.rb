@@ -43,7 +43,7 @@ describe VoicesController do
   describe "emit" do
     before do
       def Voice.get(text)
-        return text
+        text
       end
 
       class VoicesController
@@ -52,11 +52,11 @@ describe VoicesController do
         end
 
         def params
-          return {text: @text}
+          {text: @text}
         end
 
         def send_data(voice, header)
-          return voice
+          voice
         end
       end
     end

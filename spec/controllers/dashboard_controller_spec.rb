@@ -7,12 +7,12 @@ describe DashboardController do
       attr_accessor :channel_list
 
       def get_fb_me
-        return nil
+        nil
       end
     end
 
     def Channel.find(arg0, arg1)
-      return []
+      []
     end
   end
 

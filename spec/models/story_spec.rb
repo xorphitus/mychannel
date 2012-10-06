@@ -3,7 +3,7 @@ require 'spec_helper'
 
 # このスコープで再定義しないとダメみたい なぜだ beforeで書きたいのに
 def open(uri)
-  return "<Result>__relation__</Result>"
+  "<Result>__relation__</Result>"
 end
 
 describe Story do
@@ -16,7 +16,7 @@ describe Story do
           end
 
           def name
-            return @name
+            @name
           end
         end
 
@@ -25,26 +25,26 @@ describe Story do
         end
 
         def message
-          return @msg
+          @msg
         end
 
         def from
-          return FromMock.new("__from.name__")
+          FromMock.new("__from.name__")
         end
       end
 
       def home
-        return [MessageMock.new("__home_message__")]
+        [MessageMock.new("__home_message__")]
       end
 
       def feed
-        return [MessageMock.new("__feed_message__")]
+        [MessageMock.new("__feed_message__")]
       end
     end
 
     yahoo = Settings.yahoo
     def yahoo.app_id
-      return "app_id"
+      "app_id"
     end
 
     module YaCan::Keyphrase
@@ -53,12 +53,12 @@ describe Story do
         def extracted.phrases
           ["__keyphrase__"]
         end
-        return extracted
+        extracted
       end
     end
 
     def YoutubeSearch.search(str)
-      return [{"video_id" => "__video_id__"}]
+      [{"video_id" => "__video_id__"}]
     end
 
     def SimpleRSS.parse(val)
@@ -68,15 +68,17 @@ describe Story do
         entry = Object.new
 
         def entry.title
-          return "__news__"
+          "__news__"
         end
 
         def entry.link
-          return "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001"
+          "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001"
         end
-        return [entry]
+
+        [entry]
       end
-      return rss
+
+      rss
     end
   end
 
