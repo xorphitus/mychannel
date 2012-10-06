@@ -17,7 +17,7 @@ module Authentication
   end
 
   # Facebookからログインユーザの情報を取得
-  def get_fb_me
+  def fb_me
     FbGraphExtension::User.me(@access_token).fetch
   end
 end

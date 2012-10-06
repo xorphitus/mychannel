@@ -3,7 +3,7 @@ class DashboardController < ApplicationController
   include Authentication
 
   def index
-    @me = get_fb_me
+    @me = fb_me
     channels = Channel.find(:all, conditions: {publish_flag: true})
     @channel_list = channels.map { |channel| [channel.name, channel.id] }
   end

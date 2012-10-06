@@ -6,7 +6,7 @@ describe DashboardController do
     class DashboardController
       attr_accessor :channel_list
 
-      def get_fb_me
+      def fb_me
         nil
       end
     end
