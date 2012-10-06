@@ -18,7 +18,7 @@ Fabricator(:topic00, class_name: :topic) do
   channel
 end
 
-Fabricator(:trac00, class_name: :trac) do
+Fabricator(:track00, class_name: :track) do
   target "message"
   action "plane"
   pre_content "pre "
@@ -26,7 +26,7 @@ Fabricator(:trac00, class_name: :trac) do
   topic
 end
 
-Fabricator(:trac01, class_name: :trac) do
+Fabricator(:track01, class_name: :track) do
   target "prev"
   action "keyword"
   pre_content "pre "
@@ -34,7 +34,7 @@ Fabricator(:trac01, class_name: :trac) do
   topic
 end
 
-Fabricator(:trac02, class_name: :trac) do
+Fabricator(:track02, class_name: :track) do
   target "prev"
   action "relation"
   pre_content "pre "
@@ -42,7 +42,7 @@ Fabricator(:trac02, class_name: :trac) do
   topic
 end
 
-Fabricator(:trac03, class_name: :trac) do
+Fabricator(:track03, class_name: :track) do
   target "prev"
   action "news"
   pre_content "pre "
@@ -58,7 +58,7 @@ Fabricator(:topic01, class_name: :topic) do
   channel
 end
 
-Fabricator(:trac10, class_name: :trac) do
+Fabricator(:track10, class_name: :track) do
   target "from.name"
   action "plane"
   pre_content "pre "
@@ -66,7 +66,7 @@ Fabricator(:trac10, class_name: :trac) do
   topic
 end
 
-Fabricator(:trac11, class_name: :trac) do
+Fabricator(:track11, class_name: :track) do
   target "message"
   action "plane"
   pre_content "pre "
@@ -74,7 +74,7 @@ Fabricator(:trac11, class_name: :trac) do
   topic
 end
 
-Fabricator(:trac12, class_name: :trac) do
+Fabricator(:track12, class_name: :track) do
   target "prev"
   action "keyword"
   pre_content "pre "
@@ -82,7 +82,7 @@ Fabricator(:trac12, class_name: :trac) do
   topic
 end
 
-Fabricator(:trac13, class_name: :trac) do
+Fabricator(:track13, class_name: :track) do
   target "prev"
   action "news"
   pre_content "pre "

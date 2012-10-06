@@ -36,7 +36,7 @@ ActiveRecord::Schema.define(:version => 20120916085849) do
 
   add_index "topics", ["channel_id"], :name => "index_topics_on_channel_id"
 
-  create_table "tracs", :force => true do |t|
+  create_table "tracks", :force => true do |t|
     t.integer  "topic_id"
     t.string   "target",       :null => false
     t.string   "action",       :null => false
@@ -46,7 +46,7 @@ ActiveRecord::Schema.define(:version => 20120916085849) do
     t.datetime "updated_at",   :null => false
   end
 
-  add_index "tracs", ["topic_id"], :name => "index_tracs_on_topic_id"
+  add_index "tracks", ["topic_id"], :name => "index_tracks_on_topic_id"
 
   create_table "users", :force => true do |t|
     t.string   "fb_id",      :null => false

@@ -1,6 +1,6 @@
-class CreateTracs < ActiveRecord::Migration
+class CreateTracks < ActiveRecord::Migration
   def change
-    create_table :tracs do |t|
+    create_table :tracks do |t|
       t.references :topic
       t.string :target, null: false
       t.string :action, null: false
@@ -9,6 +9,6 @@ class CreateTracs < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :tracs, :topic_id
+    add_index :tracks, :topic_id
   end
 end

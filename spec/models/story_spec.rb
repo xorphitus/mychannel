@@ -86,10 +86,10 @@ describe Story do
         user = Fabricate(:user)
         @channel = Fabricate(:channel, user: user)
         topic = Fabricate(:topic00, channel: @channel)
-        Fabricate(:trac00, topic: topic)
-        Fabricate(:trac01, topic: topic)
-        Fabricate(:trac02, topic: topic)
-        Fabricate(:trac03, topic: topic)
+        Fabricate(:track00, topic: topic)
+        Fabricate(:track01, topic: topic)
+        Fabricate(:track02, topic: topic)
+        Fabricate(:track03, topic: topic)
       end
 
       it "returns an array which has some Hashes" do
@@ -116,10 +116,10 @@ describe Story do
         user = Fabricate(:user)
         @channel = Fabricate(:channel, user: user)
         topic = Fabricate(:topic01, channel: @channel)
-        Fabricate(:trac10, topic: topic)
-        Fabricate(:trac11, topic: topic)
-        Fabricate(:trac12, topic: topic)
-        Fabricate(:trac13, topic: topic)
+        Fabricate(:track10, topic: topic)
+        Fabricate(:track11, topic: topic)
+        Fabricate(:track12, topic: topic)
+        Fabricate(:track13, topic: topic)
       end
 
       it "returns an array which has some Hashes" do
@@ -150,7 +150,7 @@ describe Story do
       it { should raise_error }
     end
 
-    context "with a channel_id which has no tracs" do
+    context "with a channel_id which has no tracks" do
       before do
         user = Fabricate(:user)
         @channel = Fabricate(:channel, user: user)
@@ -162,10 +162,10 @@ describe Story do
     end
   end
 
-  describe TracReader do
+  describe Story::TrackReader do
     describe "plane" do
       before(:each) do
-        @reader = TracReader.new
+        @reader = Story::TrackReader.new
       end
 
       it "returns text without change which does not contain any URL" do
@@ -176,65 +176,65 @@ describe Story do
       it "returns text and link which contains a URL" do
         uri = "http://hoge.com/a/b.html?c=d#e"
         input = "foo #{uri} bar"
-        trac = @reader.plane(input)
-        trac.text.should == "foo  bar"
-        trac.link.should == [uri]
+        track = @reader.plane(input)
+        track.text.should == "foo  bar"
+        track.link.should == [uri]
       end
 
       it "returns text and link which contains some URLs" do
         uri1 = "http://hoge.com/a/b.html?c=d#e1"
         uri2 = "http://hoge.com/a/b.html?c=d#e2"
         input = "foo #{uri1} bar foo #{uri2} bar"
-        trac = @reader.plane(input)
-        trac.text.should == "foo  bar foo  bar"
-        trac.link.should == [uri1, uri2]
+        track = @reader.plane(input)
+        track.text.should == "foo  bar foo  bar"
+        track.link.should == [uri1, uri2]
       end
     end
 
     describe "news" do
       before(:each) do
-        @reader = TracReader.new
+        @reader = Story::TrackReader.new
       end
 
       it "extracts actual URL from Google NEWS fomat URL to redirect" do
-        news = TracReader.new.news("test")
+        news = Story::TrackReader.new.news("test")
         news.link.should == ["http://foo.com/bar.html?id=001"]
       end
     end
   end
 
-  describe StructuredTrac do
+  describe Story::StructuredTrack do
     before do
-      @trac = StructuredTrac.new
+      @track = Story::StructuredTrack.new
     end
 
     describe "to_hash" do
       it "convert text attribute to hash" do
-        @trac.text = "foo"
-        @trac.to_hash.should == {text: "foo"}
+        @track.text = "foo"
+        @track.to_hash.should == {text: "foo"}
       end
 
       it "convert link attribute to hash" do
-        @trac.link = "foo"
-        @trac.to_hash.should == {link: "foo"}
+        @track.link = "foo"
+        @track.to_hash.should == {link: "foo"}
       end
 
       it "convert video attribute to hash" do
-        @trac.video = "foo"
-        @trac.to_hash.should == {video: "foo"}
+        @track.video = "foo"
+        @track.to_hash.should == {video: "foo"}
       end
 
       it "do not convert text_decoration_flag attribute to hash" do
-        @trac.text_decoration_flag = false
-        @trac.to_hash.should == {}
+        @track.text_decoration_flag = false
+        @track.to_hash.should == {}
       end
 
       it "convert text, link and video attribute to hash" do
-        @trac.text = "t"
-        @trac.link = "l"
-        @trac.video = "v"
-        @trac.text_decoration_flag = true
-        @trac.to_hash.should == {text: "t", link: "l", video: "v"}
+        @track.text = "t"
+        @track.link = "l"
+        @track.video = "v"
+        @track.text_decoration_flag = true
+        @track.to_hash.should == {text: "t", link: "l", video: "v"}
       end
     end
   end
