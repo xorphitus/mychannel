@@ -50,8 +50,8 @@ channelSelector = (->
 )()
 
 audio = (->
-  audio = $("audio:first")
-  audioObj = audio.get(0)
+  audioElem = $("audio:first")
+  audioObj = audioElem.get(0)
   AUDIO_CONTENT_TYPE = "audio/mpeg"
   if typeof audioObj.canPlayType isnt "function" or not audioObj.canPlayType(AUDIO_CONTENT_TYPE)
     audiojs.events.ready ->
@@ -59,8 +59,8 @@ audio = (->
 
     alert "ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも"
   play: (src, callback) ->
-    audio.attr("src", src).bind "ended", ->
-      audio.unbind "ended"
+    audioElem.attr("src", src).bind "ended", ->
+      audioElem.unbind "ended"
       callback()
 )()
 
@@ -72,7 +72,10 @@ audio = (->
   READ_TEXT_MAX_LENGTH = 100
   LOAD_INTERVAL_MILLIS = 3000
   QUEUE_SIZE = 3
+
   queue = []
+  channelId = null
+
   exec = (t) ->
     target = t
     unless target
