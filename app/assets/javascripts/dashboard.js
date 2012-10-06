@@ -90,7 +90,7 @@ audio = (function () {
         audiojs.events.ready(function () {
             var as = audiojs.createAll();
         });
-        alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい.');
+        alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも');
     }
 
     return {
