@@ -12,6 +12,13 @@ end
 group :development do
   gem 'spork'
   gem 'simplecov'
+  # guard
+  gem 'rb-fsevent'
+  gem 'guard-spork'
+  gem 'guard-rspec'
+  # notify
+  gem 'libnotify'
+  gem 'rb-inotify'
 end
 
 # db
