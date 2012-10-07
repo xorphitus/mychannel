@@ -12,10 +12,13 @@ end
 group :development do
   gem 'spork'
   gem 'simplecov'
-  # guard
+  # guard - ruby
   gem 'rb-fsevent'
   gem 'guard-spork'
   gem 'guard-rspec'
+  # guard - coffee
+  gem 'guard-coffeescript'
+  gem 'guard-livereload'
   # notify
   gem 'libnotify'
   gem 'rb-inotify'

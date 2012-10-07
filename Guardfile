@@ -34,3 +34,10 @@ guard 'rspec' do
   watch(%r{^spec/acceptance/steps/(.+)_steps\.rb$})   { |m| Dir[File.join("**/#{m[1]}.feature")][0] || 'spec/acceptance' }
 end
 
+# for coffeescript
+guard 'coffeescript', output: 'spec/javascripts/compiled' do
+  watch(%r{^spec/javascripts/(.*).coffee})
+end
+guard 'livereload', apply_js_live: false  do
+  watch(%r{spec/javascripts/.+\.js})
+end
