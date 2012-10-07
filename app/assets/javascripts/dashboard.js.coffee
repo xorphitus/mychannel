@@ -1,4 +1,4 @@
-video =
+window.video =
   ID: "videoplayer"
   PLAYER_ID: "mychannelVideoplayer"
   play: (url, callback) ->
@@ -19,7 +19,7 @@ video =
   onPlayerStateChange: (state) ->
     video.onFinish()  if state is 0
 
-onYouTubePlayerReady = ->
+window.onYouTubePlayerReady = ->
   player = document.getElementById(video.PLAYER_ID)
   player.addEventListener "onStateChange", "video.onPlayerStateChange"
   player.playVideo()
