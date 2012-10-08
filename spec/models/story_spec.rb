@@ -8,26 +8,19 @@ describe Story do
       File.new(Rails.root.join("spec/models/" + filename))
     end
 
-    relation_xml = to_file("relation.xml")
-    WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/) .to_return(body: relation_xml)
+    WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/) .to_return(body: to_file("relation.xml"))
 
-    keyphrase_xml = to_file("keyphrase.xml")
-    WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/) .to_return(body: keyphrase_xml)
+    WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/) .to_return(body: to_file("keyphrase.xml"))
 
-    news_xml = to_file("news.xml")
-    WebMock.stub_request(:get, /news\.google\.com/) .to_return(body: news_xml)
+    WebMock.stub_request(:get, /news\.google\.com/) .to_return(body: to_file("news.xml"))
 
-    video_xml = to_file("video.xml")
-    WebMock.stub_request(:get, /gdata\.youtube\.com/) .to_return(body: video_xml)
+    WebMock.stub_request(:get, /gdata\.youtube\.com/) .to_return(body: to_file("video.xml"))
 
-    fb_me_json = to_file("fb_me.json")
-    WebMock.stub_request(:get, /graph\.facebook\.com\/me\?/) .to_return(body: fb_me_json)
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\?/) .to_return(body: to_file("fb_me.json"))
 
-    fb_feed_json = to_file("fb_feed.json")
-    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/) .to_return(body: fb_feed_json)
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/) .to_return(body: to_file("fb_feed.json"))
 
-    fb_home_json = to_file("fb_home.json")
-    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/) .to_return(body: fb_home_json)
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/) .to_return(body: to_file("fb_home.json"))
 
     yahoo = Settings.yahoo
     def yahoo.app_id
