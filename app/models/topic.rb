@@ -111,7 +111,6 @@ class Topic < ActiveRecord::Base
     end
   end
 
-
   def self.to_story(me, channel_id)
     topics = Topic.where(channel_id: channel_id)
     if topics.empty?
@@ -129,16 +128,15 @@ class Topic < ActiveRecord::Base
     if ["home", "feed"].include?(topic.target)
       fb_targets.reject! { |i| i.message.nil? }
     end
-    if fb_targets.nil?
+    if fb_targets.empty?
       return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
     end
 
     fb_target = fb_targets.sample
-    content_array = []
     inherited_value = nil
     track_reader = TrackReader.new
 
-    tracks.each do |track|
+    content_array = tracks.map do |track|
       if track.target == "prev"
         seed = inherited_value
       else
@@ -155,7 +153,7 @@ class Topic < ActiveRecord::Base
         end
         json_elem[:text] = "#{track.pre_content}#{inherited_value}#{track.post_content}"
       end
-      content_array.push(json_elem)
+      json_elem
     end
 
     {metadata: {hash: content_array.hash}, content: content_array}
