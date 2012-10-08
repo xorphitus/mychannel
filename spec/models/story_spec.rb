@@ -2,7 +2,6 @@
 require 'spec_helper'
 
 describe Story do
-
   before do
     def to_file(filename)
       File.new(Rails.root.join("spec/models/" + filename))
