@@ -5,24 +5,22 @@ describe DashboardController do
   before do
     class DashboardController
       attr_accessor :channel_list
-
-      def fb_me
-        nil
-      end
-    end
-
-    def Channel.find(arg0, arg1)
-      []
     end
   end
 
   describe "index" do
     before do
+      me_json = File.new(Rails.root.join("spec/models/fb_me.json"))
+      WebMock.stub_request(:get, /graph\.facebook\.com\/me/) .to_return(body: me_json)
+
+      user = Fabricate(:user)
+      channel = Fabricate(:channel, user: user)
+
       @controller = DashboardController.new
-      @controller.index
     end
 
     it "assigns pairs of name and ID number to channel_list" do
+      @controller.index
       @controller.channel_list.each do |channel|
         channel.size.should == 2
         channel[0].class.should == String

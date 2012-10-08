@@ -9,17 +9,10 @@ describe Story do
     end
 
     WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/) .to_return(body: to_file("relation.xml"))
-
     WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/) .to_return(body: to_file("keyphrase.xml"))
-
     WebMock.stub_request(:get, /news\.google\.com/) .to_return(body: to_file("news.xml"))
-
     WebMock.stub_request(:get, /gdata\.youtube\.com/) .to_return(body: to_file("video.xml"))
-
-    WebMock.stub_request(:get, /graph\.facebook\.com\/me\?/) .to_return(body: to_file("fb_me.json"))
-
     WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/) .to_return(body: to_file("fb_feed.json"))
-
     WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/) .to_return(body: to_file("fb_home.json"))
 
     yahoo = Settings.yahoo
