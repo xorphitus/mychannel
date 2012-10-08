@@ -18,11 +18,13 @@ end
 class VoicesController < ApplicationController
   include Authentication
 
+  def adjust_text(str)
+    str.gsub(/\s+/, ",").roman_to_katakana().limit(100, "以下略")
+  end
+
   # 受け取ったテキストから音声データを返却する
   def emit
-    text = params[:text].gsub(/\s+/, ",").roman_to_katakana
-    text = text.limit(100, "以下略")
-
+    text = adjust_text(params[:text])
     send_data(Voice.get(text), type: Voice.content_type)
   end
 end

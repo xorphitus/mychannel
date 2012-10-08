@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe VoicesController do
-  describe String do
+  describe String, "extended for VoicesController" do
     describe "limit" do
       context "without suffix" do
         context "string size is smaller than limit" do
@@ -40,28 +40,8 @@ describe VoicesController do
     end
   end
 
-  describe "emit" do
-    before do
-      def Voice.get(text)
-        text
-      end
-
-      class VoicesController
-        def initialize(text)
-          @text = text
-        end
-
-        def params
-          {text: @text}
-        end
-
-        def send_data(voice, header)
-          voice
-        end
-      end
-    end
-
-    subject { VoicesController.new("テスト    hoge てすと").emit }
+  describe "adjust_text" do
+    subject { VoicesController.new().adjust_text("テスト    hoge てすと") }
     it { should == "テスト,ホゲ,てすと" }
   end
 end
