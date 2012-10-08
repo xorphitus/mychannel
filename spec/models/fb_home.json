@@ -1,0 +1,38 @@
+{
+   "data": [
+      {
+         "id": "12345",
+         "from": {
+            "name": "__from.name__",
+            "category": "category",
+            "id": "12345"
+         },
+         "message": "__home_message__",
+         "picture": "https://fbcdn-photos-a.akamaihd.net/",
+         "link": "https://www.facebook.com/photo.php",
+         "icon": "https://s-static.ak.facebook.com/",
+         "actions": [
+            {
+               "name": "Comment",
+               "link": "https://www.facebook.com/"
+            },
+            {
+               "name": "Like",
+               "link": "https://www.facebook.com/"
+            }
+         ],
+         "type": "photo",
+         "status_type": "added_photos",
+         "object_id": "12345",
+         "created_time": "2012-10-08T05:00:03+0000",
+         "updated_time": "2012-10-08T05:00:03+0000",
+         "comments": {
+            "count": 0
+         }
+      }
+   ],
+   "paging": {
+      "previous": "https://graph.facebook.com/12345/home?access_token=xxx&limit=25&since=1349672403&__previous=1",
+      "next": "https://graph.facebook.com/12345/home?access_token=xxx&limit=25&until=1349614969"
+   }
+}

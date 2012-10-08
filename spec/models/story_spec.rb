@@ -4,55 +4,30 @@ require 'spec_helper'
 describe Story do
 
   before do
-    def path(filename)
-      Rails.root.join("spec/models/" + filename)
+    def to_file(filename)
+      File.new(Rails.root.join("spec/models/" + filename))
     end
 
-    relation_xml = File.new(path("relation.xml"))
+    relation_xml = to_file("relation.xml")
     WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/) .to_return(body: relation_xml)
 
-    keyphrase_xml = File.new(path("keyphrase.xml"))
+    keyphrase_xml = to_file("keyphrase.xml")
     WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/) .to_return(body: keyphrase_xml)
 
-    news_xml = File.new(path("news.xml"))
+    news_xml = to_file("news.xml")
     WebMock.stub_request(:get, /news\.google\.com/) .to_return(body: news_xml)
 
-    video_xml = File.new(path("video.xml"))
+    video_xml = to_file("video.xml")
     WebMock.stub_request(:get, /gdata\.youtube\.com/) .to_return(body: video_xml)
 
-    class FbMock
-      class MessageMock
-        class FromMock
-          def initialize(name)
-            @name = name
-          end
+    fb_me_json = to_file("fb_me.json")
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\?/) .to_return(body: fb_me_json)
 
-          def name
-            @name
-          end
-        end
+    fb_feed_json = to_file("fb_feed.json")
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/) .to_return(body: fb_feed_json)
 
-        def initialize(msg)
-          @msg = msg
-        end
-
-        def message
-          @msg
-        end
-
-        def from
-          FromMock.new("__from.name__")
-        end
-      end
-
-      def home
-        [MessageMock.new("__home_message__")]
-      end
-
-      def feed
-        [MessageMock.new("__feed_message__")]
-      end
-    end
+    fb_home_json = to_file("fb_home.json")
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/) .to_return(body: fb_home_json)
 
     yahoo = Settings.yahoo
     def yahoo.app_id
@@ -73,7 +48,7 @@ describe Story do
       end
 
       it "returns an array which has some Hashes" do
-        json = Story.get(FbMock.new, @channel.id)
+        json = Story.get(FbGraph::User.me(nil), @channel.id)
 
         json.class.should == Hash
 
@@ -103,7 +78,7 @@ describe Story do
       end
 
       it "returns an array which has some Hashes" do
-        json = Story.get(FbMock.new, @channel.id)
+        json = Story.get(FbGraph::User.me(nil), @channel.id)
 
         json.class.should == Hash
 
@@ -126,7 +101,7 @@ describe Story do
         @undefined_channel_id = 1
       end
 
-      subject { lambda { Story.get(FbMock.new, @undefined_channel_id) } }
+      subject { lambda { Story.get(FbGraph::User.me(nil), @undefined_channel_id) } }
       it { should raise_error }
     end
 
@@ -137,7 +112,7 @@ describe Story do
         topic = Fabricate(:topic00, channel: @channel)
       end
 
-      subject { lambda { Story.get(FbMock.new, @channel.id) } }
+      subject { lambda { Story.get(FbGraph::User.me(nil), @channel.id) } }
       it { should raise_error }
     end
   end
