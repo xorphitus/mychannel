@@ -111,7 +111,7 @@ class Topic < ActiveRecord::Base
     end
   end
 
-  def self.to_story(me, channel_id)
+  def self.topic_tree(channel_id)
     topics = Topic.where(channel_id: channel_id)
     if topics.empty?
       raise "Could not find any topics for channel_id = #{channel_id}"
@@ -123,6 +123,12 @@ class Topic < ActiveRecord::Base
     if tracks.empty?
       raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}"
     end
+
+    return topic, tracks
+  end
+
+  def self.to_story(me, channel_id)
+    topic, tracks = topic_tree(channel_id)
 
     fb_targets = me.send(topic.target.to_sym)
     if ["home", "feed"].include?(topic.target)
