@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResultSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:yahoo:jp:srchunit" xsi:schemaLocation="urn:yahoo:jp:srchunit http://search.yahooapis.jp/AssistedSearchService/V1/WebUnitSearchResponse.xsd" totalResultReturned="2" totalResultsAvailable="100" firstResultPosition="1">
+  <Result>__relation__</Result>
+</ResultSet>

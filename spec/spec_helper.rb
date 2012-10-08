@@ -1,9 +1,7 @@
-# use simplecov
+require 'webmock/rspec'
+require 'spork'
 require 'simplecov'
 SimpleCov.start 'rails'
-
-# use spork
-require 'spork'
 
 Spork.prefork do
   # This file is copied to spec/ when you run 'rails generate rspec:install'

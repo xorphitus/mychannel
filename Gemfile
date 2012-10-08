@@ -6,6 +6,7 @@ gem 'rails', '3.2.7'
 group :development, :test do
   gem 'rspec-rails', '~> 2.0'
   gem 'fabrication'
+  gem 'webmock'
   gem 'jasmine'
 end
 

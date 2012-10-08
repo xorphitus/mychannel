@@ -1,13 +1,25 @@
 # -*- coding: utf-8 -*-
 require 'spec_helper'
 
-# このスコープで再定義しないとダメみたい なぜだ beforeで書きたいのに
-def open(uri)
-  "<Result>__relation__</Result>"
-end
-
 describe Story do
+
   before do
+    def path(filename)
+      Rails.root.join("spec/models/" + filename)
+    end
+
+    relation_xml = File.new(path("relation.xml"))
+    WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/) .to_return(body: relation_xml)
+
+    keyphrase_xml = File.new(path("keyphrase.xml"))
+    WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/) .to_return(body: keyphrase_xml)
+
+    news_xml = File.new(path("news.xml"))
+    WebMock.stub_request(:get, /news\.google\.com/) .to_return(body: news_xml)
+
+    video_xml = File.new(path("video.xml"))
+    WebMock.stub_request(:get, /gdata\.youtube\.com/) .to_return(body: video_xml)
+
     class FbMock
       class MessageMock
         class FromMock
@@ -45,40 +57,6 @@ describe Story do
     yahoo = Settings.yahoo
     def yahoo.app_id
       "app_id"
-    end
-
-    module YaCan::Keyphrase
-      def self.extract(str)
-        extracted = Object.new
-        def extracted.phrases
-          ["__keyphrase__"]
-        end
-        extracted
-      end
-    end
-
-    def YoutubeSearch.search(str)
-      [{"video_id" => "__video_id__"}]
-    end
-
-    def SimpleRSS.parse(val)
-      rss = Object.new
-
-      def rss.entries
-        entry = Object.new
-
-        def entry.title
-          "__news__"
-        end
-
-        def entry.link
-          "http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001"
-        end
-
-        [entry]
-      end
-
-      rss
     end
   end
 

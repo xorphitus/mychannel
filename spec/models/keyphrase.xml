@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResultSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:yahoo:jp:jlp:KeyphraseService"
+  xsi:schemaLocation="urn:yahoo:jp:jlp:KeyphraseService http://jlp.yahooapis.jp/KeyphraseService/V1/extract.xsd">
+  <Result>
+    <Keyphrase>__keyphrase__</Keyphrase>
+    <Score>100</Score>
+  </Result>
+</ResultSet>

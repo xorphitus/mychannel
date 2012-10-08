@@ -1,0 +1,26 @@
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <generator>NFE/1.0</generator>
+  <id>tag:news.google.com,2012-10-08:/us/ja/1349671882729</id>
+  <title>__title__</title>
+  <link rel="self" type="application/atom+xml" href="http://foo.com/"/>
+  <link rel="alternate" type="text/html" href="http://bar.com/"/>
+
+  <author>
+    <name>Google Inc.</name>
+    <email>news-feedback@google.com</email>
+  </author>
+  <rights>&copy;2012 Google</rights>
+  <updated>2012-10-08T04:51:22Z</updated>
+  <logo>https://ssl.gstatic.com/news/img/logo/en_us/news.gif</logo>
+
+  <entry>
+    <id>tag:news.google.com,2005:cluster=52778067821189</id>
+    <title type="html">__news__</title>
+    <category term="Sports"/>
+    <updated>2012-10-08T04:24:05Z</updated>
+    <link rel="alternate" type="text/html" href="http://news.google.com/news/url?sa=t&amp;fd=R&amp;usg=AFQjCNECYBnagl1AD2mcN5hRdE4w8pGdbA&amp;url=http://foo.com/bar.html?id%3D001" hreflang="ja"/>
+    <content type="html">
+      content
+    </content>
+  </entry>
+</feed>
