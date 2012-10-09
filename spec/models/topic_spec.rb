@@ -7,12 +7,12 @@ describe Topic do
       File.new(Rails.root.join("spec/models/" + filename))
     end
 
-    WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/) .to_return(body: to_file("relation.xml"))
-    WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/) .to_return(body: to_file("keyphrase.xml"))
-    WebMock.stub_request(:get, /news\.google\.com/) .to_return(body: to_file("news.xml"))
-    WebMock.stub_request(:get, /gdata\.youtube\.com/) .to_return(body: to_file("video.xml"))
-    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/) .to_return(body: to_file("fb_feed.json"))
-    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/) .to_return(body: to_file("fb_home.json"))
+    WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/).to_return(body: to_file("relation.xml"))
+    WebMock.stub_request(:post, /jlp\.yahooapis\.jp\/KeyphraseService/).to_return(body: to_file("keyphrase.xml"))
+    WebMock.stub_request(:get, /news\.google\.com/).to_return(body: to_file("news.xml"))
+    WebMock.stub_request(:get, /gdata\.youtube\.com/).to_return(body: to_file("video.xml"))
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/).to_return(body: to_file("fb_feed.json"))
+    WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/).to_return(body: to_file("fb_home.json"))
 
     yahoo = Settings.yahoo
     def yahoo.app_id
@@ -21,11 +21,13 @@ describe Topic do
   end
 
   describe "to_story" do
+    let(:user) { Fabricate(:user) }
+
     context "with a right channel_id which contains a topic about 'feed'" do
+      let(:channel) { Fabricate(:channel, user: user) }
+      let(:topic) { Fabricate(:topic00, channel: channel) }
+
       before do
-        user = Fabricate(:user)
-        @channel = Fabricate(:channel, user: user)
-        topic = Fabricate(:topic00, channel: @channel)
         Fabricate(:track00, topic: topic)
         Fabricate(:track01, topic: topic)
         Fabricate(:track02, topic: topic)
@@ -33,7 +35,7 @@ describe Topic do
       end
 
       it "returns an array which has some Hashes" do
-        json = Topic.to_story(FbGraph::User.me(nil), @channel.id)
+        json = Topic.to_story(FbGraph::User.me(nil), channel.id)
 
         json.class.should == Hash
 
@@ -52,10 +54,10 @@ describe Topic do
     end
 
     context "with a right channel_id which contains a topic about 'home'" do
+      let(:channel) { Fabricate(:channel, user: user) }
+      let(:topic) { Fabricate(:topic01, channel: channel) }
+
       before do
-        user = Fabricate(:user)
-        @channel = Fabricate(:channel, user: user)
-        topic = Fabricate(:topic01, channel: @channel)
         Fabricate(:track10, topic: topic)
         Fabricate(:track11, topic: topic)
         Fabricate(:track12, topic: topic)
@@ -63,7 +65,7 @@ describe Topic do
       end
 
       it "returns an array which has some Hashes" do
-        json = Topic.to_story(FbGraph::User.me(nil), @channel.id)
+        json = Topic.to_story(FbGraph::User.me(nil), channel.id)
 
         json.class.should == Hash
 
@@ -82,41 +84,32 @@ describe Topic do
     end
 
     context "with a wrong channel_id" do
-      before do
-        @undefined_channel_id = 1
-      end
-
-      subject { lambda { Topic.to_story(FbGraph::User.me(nil), @undefined_channel_id) } }
+      let(:undefined_channel_id) { 1 }
+      subject { lambda { Topic.to_story(FbGraph::User.me(nil), undefined_channel_id) } }
       it { should raise_error }
     end
 
     context "with a channel_id which has no tracks" do
-      before do
-        user = Fabricate(:user)
-        @channel = Fabricate(:channel, user: user)
-        topic = Fabricate(:topic00, channel: @channel)
-      end
-
-      subject { lambda { Topic.to_story(FbGraph::User.me(nil), @channel.id) } }
+      let(:channel) { Fabricate(:channel, user: user) }
+      before { Fabricate(:topic00, channel: channel) }
+      subject { lambda { Topic.to_story(FbGraph::User.me(nil), channel.id) } }
       it { should raise_error }
     end
   end
 
   describe Topic::TrackReader do
-    describe "plane" do
-      before(:each) do
-        @reader = Topic::TrackReader.new
-      end
+    let(:reader) { Topic::TrackReader.new }
 
+    describe "plane" do
       it "returns text without change which does not contain any URL" do
         input = "hoge"
-        @reader.plane(input).text.should == input
+        reader.plane(input).text.should == input
       end
 
       it "returns text and link which contains a URL" do
         uri = "http://hoge.com/a/b.html?c=d#e"
         input = "foo #{uri} bar"
-        track = @reader.plane(input)
+        track = reader.plane(input)
         track.text.should == "foo  bar"
         track.link.should == [uri]
       end
@@ -125,56 +118,50 @@ describe Topic do
         uri1 = "http://hoge.com/a/b.html?c=d#e1"
         uri2 = "http://hoge.com/a/b.html?c=d#e2"
         input = "foo #{uri1} bar foo #{uri2} bar"
-        track = @reader.plane(input)
+        track = reader.plane(input)
         track.text.should == "foo  bar foo  bar"
         track.link.should == [uri1, uri2]
       end
     end
 
     describe "news" do
-      before(:each) do
-        @reader = Topic::TrackReader.new
-      end
-
       it "extracts actual URL from Google NEWS fomat URL to redirect" do
-        news = Topic::TrackReader.new.news("test")
+        news = reader.news("test")
         news.link.should == ["http://foo.com/bar.html?id=001"]
       end
     end
   end
 
   describe Topic::StructuredTrack do
-    before do
-      @track = Topic::StructuredTrack.new
-    end
+    let(:st_track) { Topic::StructuredTrack.new }
 
     describe "to_hash" do
       it "convert text attribute to hash" do
-        @track.text = "foo"
-        @track.to_hash.should == {text: "foo"}
+        st_track.text = "foo"
+        st_track.to_hash.should == {text: "foo"}
       end
 
       it "convert link attribute to hash" do
-        @track.link = "foo"
-        @track.to_hash.should == {link: "foo"}
+        st_track.link = "foo"
+        st_track.to_hash.should == {link: "foo"}
       end
 
       it "convert video attribute to hash" do
-        @track.video = "foo"
-        @track.to_hash.should == {video: "foo"}
+        st_track.video = "foo"
+        st_track.to_hash.should == {video: "foo"}
       end
 
       it "do not convert text_decoration_flag attribute to hash" do
-        @track.text_decoration_flag = false
-        @track.to_hash.should == {}
+        st_track.text_decoration_flag = false
+        st_track.to_hash.should == {}
       end
 
       it "convert text, link and video attribute to hash" do
-        @track.text = "t"
-        @track.link = "l"
-        @track.video = "v"
-        @track.text_decoration_flag = true
-        @track.to_hash.should == {text: "t", link: "l", video: "v"}
+        st_track.text = "t"
+        st_track.link = "l"
+        st_track.video = "v"
+        st_track.text_decoration_flag = true
+        st_track.to_hash.should == {text: "t", link: "l", video: "v"}
       end
     end
   end
