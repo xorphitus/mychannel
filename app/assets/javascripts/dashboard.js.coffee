@@ -74,8 +74,6 @@ window.audio = (->
   QUEUE_SIZE = 3
 
   queue = []
-  channelId = null
-
   exec = (t) ->
     target = t
     unless target
@@ -101,6 +99,8 @@ window.audio = (->
     else
       exec queue.shift()
 
+  channelId = null
+  prevStoryHash = null
   loadData = (callback) ->
     $('#' + LOADING_IMG_ID).show()
     $.get '/stories/' + channelId, (data) ->
