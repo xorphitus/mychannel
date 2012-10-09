@@ -25,9 +25,9 @@ describe Topic do
 
     context "with a right channel_id which contains a topic about 'feed'" do
       let(:channel) { Fabricate(:channel, user: user) }
-      let(:topic) { Fabricate(:topic00, channel: channel) }
 
       before do
+        topic = Fabricate(:topic00, channel: channel)
         Fabricate(:track00, topic: topic)
         Fabricate(:track01, topic: topic)
         Fabricate(:track02, topic: topic)
@@ -55,9 +55,9 @@ describe Topic do
 
     context "with a right channel_id which contains a topic about 'home'" do
       let(:channel) { Fabricate(:channel, user: user) }
-      let(:topic) { Fabricate(:topic01, channel: channel) }
 
       before do
+        topic = Fabricate(:topic01, channel: channel)
         Fabricate(:track10, topic: topic)
         Fabricate(:track11, topic: topic)
         Fabricate(:track12, topic: topic)
