@@ -88,7 +88,7 @@ window.audio = (->
       $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown 'fast'
       encodedText = encodeURIComponent(target.text)
       encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH))  if encodedText.length > WEBRIC_URL_MAX_LENGTH
-      audio.play '/voice?text=' + encodedText, ->
+      audio.play '/voices/' + encodedText, ->
         exec queue.shift()
 
       linkDisplay.add target.link  if target.link
@@ -103,7 +103,7 @@ window.audio = (->
 
   loadData = (callback) ->
     $('#' + LOADING_IMG_ID).show()
-    $.get '/story?channel_id=' + channelId, (data) ->
+    $.get '/stories/' + channelId, (data) ->
       if data.metadata.hash is prevStoryHash
         # 2回連続で同じstoryを再生しないためのチェック機構
         loadData callback  if typeof callback is 'function'

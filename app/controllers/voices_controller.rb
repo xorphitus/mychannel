@@ -23,8 +23,8 @@ class VoicesController < ApplicationController
   end
 
   # 受け取ったテキストから音声データを返却する
-  def emit
-    text = adjust_text(params[:text])
+  def show
+    text = adjust_text(params[:id])
     send_data(Voice.get(text), type: Voice.content_type)
   end
 end

@@ -10,7 +10,7 @@
     \&nbsp;番組を聞く
 .row
   .span5
-    = content_tag "audio", nil, {src: URI.encode("/voice?text=ようこそ#{@me.name}さん"), controls: true, autoplay: true}
+    = content_tag "audio", nil, {src: voice_path("ようこそ#{@me.name}さん"), controls: true, autoplay: true}
     %pre#textdisplay.prettyprint
       :preserve
     %ul#link_display.unstyled
