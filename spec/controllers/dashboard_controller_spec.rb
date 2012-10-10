@@ -8,7 +8,7 @@ describe DashboardController do
       WebMock.stub_request(:get, /graph\.facebook\.com\/me/).to_return(body: me_json)
 
       user = Fabricate(:user)
-      channel = Fabricate(:channel, user: user)
+      Fabricate(:channel, user: user)
     end
 
     context "when a request is not authenticated" do
