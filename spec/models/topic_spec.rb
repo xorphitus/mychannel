@@ -4,7 +4,7 @@ require 'spec_helper'
 describe Topic do
   before do
     def to_file(filename)
-      File.new(Rails.root.join("spec/models/" + filename))
+      File.new(Rails.root.join("spec/webmocks/" + filename))
     end
 
     WebMock.stub_request(:get, /search\.yahooapis\.jp\/AssistSearchService/).to_return(body: to_file("relation.xml"))
@@ -13,11 +13,6 @@ describe Topic do
     WebMock.stub_request(:get, /gdata\.youtube\.com/).to_return(body: to_file("video.xml"))
     WebMock.stub_request(:get, /graph\.facebook\.com\/me\/feed/).to_return(body: to_file("fb_feed.json"))
     WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/).to_return(body: to_file("fb_home.json"))
-
-    yahoo = Settings.yahoo
-    def yahoo.app_id
-      "app_id"
-    end
   end
 
   describe "to_story" do
@@ -37,13 +32,13 @@ describe Topic do
       it "returns an array which has some Hashes" do
         json = Topic.to_story(FbGraph::User.me(nil), channel.id)
 
-        json.class.should == Hash
+        json.should be_an_instance_of Hash
 
         json[:metadata].should_not be_nil
         json[:metadata][:hash].should_not be_nil
 
         contents = json[:content]
-        contents.class.should == Array
+        contents.should be_an_instance_of Array
         contents.should have(4).items
 
         contents[0][:text].should == "pre __feed_message__ post"
@@ -67,13 +62,13 @@ describe Topic do
       it "returns an array which has some Hashes" do
         json = Topic.to_story(FbGraph::User.me(nil), channel.id)
 
-        json.class.should == Hash
+        json.should be_an_instance_of Hash
 
         json[:metadata].should_not be_nil
         json[:metadata][:hash].should_not be_nil
 
         contents = json[:content]
-        contents.class.should == Array
+        contents.should be_an_instance_of Array
         contents.should have(4).items
 
         contents[0][:text].should == "pre __from.name__ post"
