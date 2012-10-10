@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# controllerでincludeするとFacebookログインしないとアクセスできないリソースになる
 module Authentication
-  def self.included base
-    base.before_filter :require_authentication
-  end
-
+  # before_filterで呼ぶと認証がかかる
   def require_authentication
     fb_auth = FbGraph::Auth.new(Settings.fb.app_id, Settings.fb.app_secret)
     begin

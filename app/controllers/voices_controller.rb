@@ -10,13 +10,12 @@ class String
         return self[0, max_len - suffix.size + 1] + suffix
       end
     end
-
     self
   end
 end
 
 class VoicesController < ApplicationController
-  include Authentication
+  before_filter :require_authentication
 
   def adjust_text(str)
     str.gsub(/\s+/, ",").roman_to_katakana().limit(100, "以下略")

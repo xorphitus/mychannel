@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 class DashboardController < ApplicationController
-  include Authentication
+  before_filter :require_authentication
 
   def index
     @me = fb_me

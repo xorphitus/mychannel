@@ -1,6 +1,6 @@
 Mychannel::Application.routes.draw do
-  root to: 'login#index'
-  resources :logout, only: ['index']
+  root to: 'sessions#new'
+  resource :session, only: ['new', 'destroy']
   resources :dashboard, only: ['index']
   resources :voices, only: ['show']
   resources :stories, only: ['show']
