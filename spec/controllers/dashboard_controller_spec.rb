@@ -5,7 +5,7 @@ describe DashboardController do
   describe "index" do
     before do
       me_json = File.new(Rails.root.join("spec/webmocks/fb_me.json"))
-      WebMock.stub_request(:get, /graph\.facebook\.com\/me/) .to_return(body: me_json)
+      WebMock.stub_request(:get, /graph\.facebook\.com\/me/).to_return(body: me_json)
 
       user = Fabricate(:user)
       channel = Fabricate(:channel, user: user)
