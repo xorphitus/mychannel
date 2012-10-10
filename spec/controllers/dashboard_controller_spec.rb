@@ -11,12 +11,12 @@ describe DashboardController do
       channel = Fabricate(:channel, user: user)
     end
 
-    context "do not authenticated" do
+    context "when a request is not authenticated" do
       before { get "index" }
       it { response.should_not be_success }
     end
 
-    context "authenticated" do
+    context "when a request is authenticated" do
       before do
         class DashboardController
           def require_authentication
