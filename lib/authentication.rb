@@ -11,9 +11,7 @@ module Authentication
     begin
       fb_auth.from_cookie(cookies)
       @access_token = fb_auth.access_token
-    rescue => e
-      puts '----------------'
-      puts e
+    rescue
       redirect_to root_url
     end
   end
