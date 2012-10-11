@@ -8,12 +8,13 @@ module Authentication
       fb_auth.from_cookie(cookies)
       @access_token = fb_auth.access_token
     rescue
+      @access_token = nil
       redirect_to root_url
     end
   end
 
   # Facebookからログインユーザの情報を取得
   def fb_me
-    FbGraphExtension::User.me(@access_token).fetch
+    FbGraph::User.me(@access_token).fetch
   end
 end
