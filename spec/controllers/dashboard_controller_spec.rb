@@ -7,24 +7,18 @@ describe DashboardController do
       me_json = File.new(Rails.root.join("spec/webmocks/fb_me.json"))
       WebMock.stub_request(:get, /graph\.facebook\.com\/me/).to_return(body: me_json)
 
-      user = Fabricate(:user)
-      Fabricate(:channel, user: user)
+      Fabricate(:channel, user: Fabricate(:user))
     end
 
     context "when a request is not authenticated" do
-      before { get "index" }
+      before { get :index }
       it { response.should_not be_success }
     end
 
     context "when a request is authenticated" do
       before do
-        class DashboardController
-          def require_authentication
-            # 認証を外す / WebMockを使ってもきれいに解決できないためやむなく再定義
-          end
-        end
-
-        get "index"
+        controller.login_as("foo", "bar")
+        get :index
       end
 
       it { response.should be_success }

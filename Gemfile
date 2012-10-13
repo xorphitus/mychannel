@@ -33,6 +33,8 @@ group :production, :test do
   gem 'mysql2'
 end
 
+gem 'dalli'
+
 # view
 gem 'haml'
 gem 'haml-rails'

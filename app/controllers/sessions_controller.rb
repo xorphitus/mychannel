@@ -3,10 +3,19 @@ class SessionsController < ApplicationController
 
   # display login page
   def new
+    redirect_to controller: :dashboard if authenticated?
+  end
+
+  def create
+    login
+    respond_to do |format|
+      format.json { head :no_content }
+    end
   end
 
   # logout
   def destroy
-    redirect_to "https://www.facebook.com/logout.php?next=#{root_url}&access_token=#{@access_token}"
+    logout
+    redirect_to root_url
   end
 end
