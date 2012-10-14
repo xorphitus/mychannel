@@ -84,7 +84,8 @@ window.audio = (->
         return
     if target.text
       $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown 'fast'
-      encodedText = encodeURIComponent(target.text)
+      # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
+      encodedText = encodeURIComponent(target.text.replace(/\./g, ' '))
       encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH))  if encodedText.length > WEBRIC_URL_MAX_LENGTH
       audio.play '/voices/' + encodedText, ->
         exec queue.shift()
