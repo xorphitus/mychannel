@@ -146,8 +146,8 @@ describe Topic do
         st_track.to_hash.should == {video: "foo"}
       end
 
-      it "do not convert text_decoration_flag attribute to hash" do
-        st_track.text_decoration_flag = false
+      it "do not convert text_decoration attribute to hash" do
+        st_track.text_decoration = false
         st_track.to_hash.should == {}
       end
 
@@ -155,7 +155,7 @@ describe Topic do
         st_track.text = "t"
         st_track.link = "l"
         st_track.video = "v"
-        st_track.text_decoration_flag = true
+        st_track.text_decoration = true
         st_track.to_hash.should == {text: "t", link: "l", video: "v"}
       end
     end

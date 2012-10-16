@@ -14,11 +14,20 @@ class Topic < ActiveRecord::Base
 
   # TrackをブラウザのハンドリングできるJSON形式に変換する前段階の構造
   class StructuredTrack
-    attr_accessor :text, :link, :video, :text_decoration_flag, :inheritance_flag
+    attr_accessor :text, :link, :video
+    attr_writer :text_decoration, :inheritance
 
     def initialize
-      self.text_decoration_flag = true
-      self.inheritance_flag = true
+      @text_decoration = true
+      @inheritance = true
+    end
+
+    def decorate_text?
+      @text_decoration
+    end
+
+    def inherited?
+      @inheritance
     end
 
     def to_hash
@@ -66,14 +75,14 @@ class Topic < ActiveRecord::Base
 
       if targets.empty?
         result.text = "とくに連想するものはありませんが"
-        result.inheritance_flag = false
-        result.text_decoration_flag = false
+        result.inheritance = false
+        result.text_decoration = false
       else
         relational_words = targets.sample.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
         if relational_words.empty?
           result.text = "とくに連想するものはありませんが"
-          result.inheritance_flag = false
-          result.text_decoration_flag = false
+          result.inheritance = false
+          result.text_decoration = false
         else
           result.text = relational_words.sample
         end
@@ -88,7 +97,7 @@ class Topic < ActiveRecord::Base
       news = rss.entries.sample
       if news.nil?
         result.text = "関連ニュースはないみたいです"
-        result.text_decoration_flag = false
+        result.text_decoration = false
         return result
       end
       result.text = news.title
@@ -153,8 +162,8 @@ class Topic < ActiveRecord::Base
 
       structured_track = track_reader.send(track.action.to_sym, seed)
       json_elem = structured_track.to_hash
-      if structured_track.text_decoration_flag
-        if structured_track.inheritance_flag
+      if structured_track.decorate_text?
+        if structured_track.inherited?
           inherited_value = structured_track.text
         end
         json_elem[:text] = "#{track.pre_content}#{inherited_value}#{track.post_content}"
