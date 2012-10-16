@@ -17,7 +17,10 @@ class Topic < ActiveRecord::Base
     attr_accessor :text, :link, :video
     attr_writer :text_decoration, :inheritance
 
-    def initialize
+    def initialize(text = nil, link = nil, video = nil)
+      @text = text
+      @link = link
+      @video = video
       @text_decoration = true
       @inheritance = true
     end
@@ -45,78 +48,69 @@ class Topic < ActiveRecord::Base
   # model - Track の内容から返却するJSONの要素を生成する
   class TrackReader
     def plane val
-      result = StructuredTrack.new
-      result.text = val
+      text = val
       urls = URI.extract(val).select { |uri| uri.match(/^(https?|ftp)/) }
-      unless urls.empty?
-        result.link = urls
+      if urls.empty?
+        link = urls
+      else
+        link = urls
         urls.each do |url|
-          result.text.gsub!(url, "")
+          text = text.gsub!(url, "")
         end
       end
 
-      result
+      StructuredTrack.new(text, link)
     end
 
     def keyword val
-      result = StructuredTrack.new
       YaCan.appid = Settings.yahoo.app_id
-      result.text = YaCan::Keyphrase.extract(val).phrases.sample
-
-      result
+      text = YaCan::Keyphrase.extract(val).phrases.sample
+      StructuredTrack.new(text)
     end
 
     def relation val
-      result = StructuredTrack.new
-
       relations = Nokogiri::XML(open("http://search.yahooapis.jp/AssistSearchService/V1/webunitSearch?appid=#{Settings.yahoo.app_id}&query=#{URI.encode(val)}"))
 
       targets = relations.css("Result").map { |node| node.content }
 
-      if targets.empty?
-        result.text = "とくに連想するものはありませんが"
-        result.inheritance = false
-        result.text_decoration = false
-      else
-        relational_words = targets.sample.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
-        if relational_words.empty?
-          result.text = "とくに連想するものはありませんが"
-          result.inheritance = false
-          result.text_decoration = false
-        else
-          result.text = relational_words.sample
-        end
+      def empty
+        empty = StructuredTrack.new("とくに連想するものはありませんが")
+        empty.inheritance = false
+        empty.text_decoration = false
+        empty
       end
 
-      result
+      return empty if targets.empty?
+
+      relational_words = targets.sample.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
+
+      return empty if relational_words.empty?
+
+      StructuredTrack.new(relational_words.sample)
     end
 
     def news val
-      result = StructuredTrack.new
       rss = SimpleRSS.parse(open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode(val)}&lr&output=atom&num=5&hl=ja"))
       news = rss.entries.sample
       if news.nil?
-        result.text = "関連ニュースはないみたいです"
-        result.text_decoration = false
-        return result
+        empty = StructuredTrack.new("関連ニュースはないみたいです")
+        empty.text_decoration = false
+        return empty
       end
-      result.text = news.title
 
+      text = news.title
       link = CGI::unescapeHTML(news.link)
       delimiter = "&url="
       link = link[link.index(delimiter) + delimiter.size, link.size]
       link = URI.decode(link)
-      result.link = [link]
 
-      result
+      StructuredTrack.new(text, [link])
     end
 
     def youtube val
-      result = StructuredTrack.new
       video_obj = YoutubeSearch.search(val).sample
-      result.video = [{url: "http://youtube.com/v/" + video_obj["video_id"], name: video_obj["name"]}]
-
-      result
+      video = [{url: "http://youtube.com/v/" + video_obj["video_id"], name: video_obj["name"]}]
+      StructuredTrack.new(nil, nil, video)
     end
   end
 
