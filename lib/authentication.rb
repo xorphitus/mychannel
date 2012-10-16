@@ -30,7 +30,7 @@ module Authentication
   end
 
   def authenticated?
-    !auth_info_key.nil? && !Rails.cache.read(auth_info_key).nil?
+    auth_info_key.present? && Rails.cache.read(auth_info_key).present?
   end
 
   # Facebookからログインユーザの情報を取得

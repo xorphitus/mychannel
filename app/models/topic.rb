@@ -131,7 +131,7 @@ class Topic < ActiveRecord::Base
     topic, tracks = select_topic_tree(channel_id)
 
     fb_targets = me.send(topic.target.to_sym)
-    if %w(home, feed).include?(topic.target)
+    if %w(home feed).include?(topic.target)
       fb_targets.reject! { |i| i.message.nil? }
     end
     if fb_targets.empty?
