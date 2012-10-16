@@ -35,6 +35,11 @@ module Authentication
 
   # Facebookからログインユーザの情報を取得
   def fb_me
-    FbGraph::User.me(Rails.cache.read(auth_info_key)).fetch
+    begin
+      FbGraph::User.me(Rails.cache.read(auth_info_key)).fetch
+    rescue
+      logout
+      redirect_to root_url
+    end
   end
 end
