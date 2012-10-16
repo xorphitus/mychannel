@@ -120,38 +120,32 @@ class Topic < ActiveRecord::Base
     end
   end
 
+  private
   def self.select_topic_tree(channel_id)
     topics = Topic.where(channel_id: channel_id)
-    if topics.empty?
-      raise "Could not find any topics for channel_id = #{channel_id}"
-    end
+    raise "Could not find any topics for channel_id = #{channel_id}" if topics.empty?
 
     topic = topics.sample
     # productionのMySQLだと想定の順序になってくれないのでひとまずidでorder
     tracks = topic.tracks.order(:id)
-    if tracks.empty?
-      raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}"
-    end
+    raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.empty?
 
     return topic, tracks
   end
 
-  def self.to_story(me, channel_id)
-    topic, tracks = select_topic_tree(channel_id)
-
+  private
+  def self.aquire_fb_target(me, topic)
     fb_targets = me.send(topic.target.to_sym)
-    if %w(home feed).include?(topic.target)
-      fb_targets.reject! { |i| i.message.nil? }
-    end
-    if fb_targets.empty?
-      return [({text: "もっとFacebook使ってリア充になって欲しいお"})]
-    end
+    fb_targets.reject! { |i| i.message.nil? } if %w(home feed).include?(topic.target)
+    fb_targets.empty? ? nil : fb_targets.sample
+  end
 
-    fb_target = fb_targets.sample
+  private
+  def self.to_story_content(fb_target, tracks)
     inherited_value = nil
     track_reader = TrackReader.new
 
-    content_array = tracks.map do |track|
+    tracks.map do |track|
       if track.target == "prev"
         seed = inherited_value
       else
@@ -163,14 +157,20 @@ class Topic < ActiveRecord::Base
       structured_track = track_reader.send(track.action.to_sym, seed)
       json_elem = structured_track.to_hash
       if structured_track.decorate_text?
-        if structured_track.inherited?
-          inherited_value = structured_track.text
-        end
+        inherited_value = structured_track.text if structured_track.inherited?
         json_elem[:text] = "#{track.pre_content}#{inherited_value}#{track.post_content}"
       end
       json_elem
     end
+  end
 
-    {metadata: {hash: content_array.hash}, content: content_array}
+  def self.to_story(me, channel_id)
+    topic, tracks = select_topic_tree(channel_id)
+
+    fb_target = aquire_fb_target(me, topic)
+    return [({text: "もっとFacebook使ってリア充になって欲しいお"})] if fb_target.nil?
+
+    content = to_story_content(fb_target, tracks)
+    {metadata: {hash: content.hash}, content: content}
   end
 end
