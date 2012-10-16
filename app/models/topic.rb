@@ -111,7 +111,7 @@ class Topic < ActiveRecord::Base
     end
   end
 
-  def self.choice_topic_tree(channel_id)
+  def self.select_topic_tree(channel_id)
     topics = Topic.where(channel_id: channel_id)
     if topics.empty?
       raise "Could not find any topics for channel_id = #{channel_id}"
@@ -128,10 +128,10 @@ class Topic < ActiveRecord::Base
   end
 
   def self.to_story(me, channel_id)
-    topic, tracks = choice_topic_tree(channel_id)
+    topic, tracks = select_topic_tree(channel_id)
 
     fb_targets = me.send(topic.target.to_sym)
-    if ["home", "feed"].include?(topic.target)
+    if %w(home, feed).include?(topic.target)
       fb_targets.reject! { |i| i.message.nil? }
     end
     if fb_targets.empty?
