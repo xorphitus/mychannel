@@ -14,12 +14,12 @@ class Topic < ActiveRecord::Base
 
   # TrackをブラウザのハンドリングできるJSON形式に変換する前段階の構造
   class StructuredTrack
-    attr_accessor :text, :link, :video
+    attr_reader :text, :links, :video
     attr_writer :text_decoration, :inheritance
 
-    def initialize(text = nil, link = nil, video = nil)
+    def initialize(text = nil, links = nil, video = nil)
       @text = text
-      @link = link
+      @links = links
       @video = video
       @text_decoration = true
       @inheritance = true
@@ -35,7 +35,7 @@ class Topic < ActiveRecord::Base
 
     def to_hash
       hash = {}
-      [:text, :link, :video].each do |attr|
+      [:text, :links, :video].each do |attr|
         value = self.send(attr)
         if value
           hash[attr] = value
@@ -47,28 +47,25 @@ class Topic < ActiveRecord::Base
 
   # model - Track の内容から返却するJSONの要素を生成する
   class TrackReader
-    def plane val
+    def plane(val)
       text = val
       urls = URI.extract(val).select { |uri| uri.match(/^(https?|ftp)/) }
-      if urls.empty?
-        link = urls
-      else
-        link = urls
+      unless urls.empty?
         urls.each do |url|
           text = text.gsub!(url, "")
         end
       end
 
-      StructuredTrack.new(text, link)
+      StructuredTrack.new(text, urls)
     end
 
-    def keyword val
+    def keyword(val)
       YaCan.appid = Settings.yahoo.app_id
       text = YaCan::Keyphrase.extract(val).phrases.sample
       StructuredTrack.new(text)
     end
 
-    def relation val
+    def relation(val)
       relations = Nokogiri::XML(open("http://search.yahooapis.jp/AssistSearchService/V1/webunitSearch?appid=#{Settings.yahoo.app_id}&query=#{URI.encode(val)}"))
 
       targets = relations.css("Result").map { |node| node.content }
@@ -84,12 +81,10 @@ class Topic < ActiveRecord::Base
 
       relational_words = targets.sample.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
 
-      return empty if relational_words.empty?
-
-      StructuredTrack.new(relational_words.sample)
+      relational_words.empty? ? empty : StructuredTrack.new(relational_words.sample)
     end
 
-    def news val
+    def news(val)
       rss = SimpleRSS.parse(open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode(val)}&lr&output=atom&num=5&hl=ja"))
       news = rss.entries.sample
       if news.nil?
@@ -101,15 +96,16 @@ class Topic < ActiveRecord::Base
       text = news.title
       link = CGI::unescapeHTML(news.link)
       delimiter = "&url="
-      link = link[link.index(delimiter) + delimiter.size, link.size]
+      start_index = link.index(delimiter) + delimiter.size
+      link = link[start_index, link.size]
       link = URI.decode(link)
 
       StructuredTrack.new(text, [link])
     end
 
-    def youtube val
+    def youtube(val)
       video_obj = YoutubeSearch.search(val).sample
-      video = [{url: "http://youtube.com/v/" + video_obj["video_id"], name: video_obj["name"]}]
+      video = [{url: "http://youtube.com/v/#{video_obj['video_id']}", name: video_obj["name"]}]
       StructuredTrack.new(nil, nil, video)
     end
   end
@@ -124,14 +120,14 @@ class Topic < ActiveRecord::Base
     tracks = topic.tracks.order(:id)
     raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.empty?
 
-    return topic, tracks
+    [topic, tracks]
   end
 
   private
   def self.aquire_fb_target(me, topic)
     fb_targets = me.send(topic.target.to_sym)
-    fb_targets.reject! { |i| i.message.nil? } if %w(home feed).include?(topic.target)
-    fb_targets.empty? ? nil : fb_targets.sample
+    fb_targets.reject! { |fb_target| fb_target.message.nil? } if %w(home feed).include?(topic.target)
+    fb_targets.sample
   end
 
   private
@@ -144,7 +140,7 @@ class Topic < ActiveRecord::Base
         seed = inherited_value
       else
         seed = fb_target
-        track.target.split(".").each { |i| seed = seed.send(i.to_sym) }
+        track.target.split(".").each { |token| seed = seed.send(token.to_sym) }
         inherited_value = seed
       end
 

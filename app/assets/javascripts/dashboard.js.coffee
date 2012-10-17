@@ -90,7 +90,7 @@ window.audio = (->
       audio.play '/voices/' + encodedText, ->
         exec queue.shift()
 
-      linkDisplay.add target.link  if target.link
+      linkDisplay.add target.links if target.links
     else if target.video
       $('#' + video.ID).slideDown()
       video.play target.video[0].url, ->

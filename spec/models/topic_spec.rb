@@ -106,7 +106,7 @@ describe Topic do
         input = "foo #{uri} bar"
         track = reader.plane(input)
         track.text.should == "foo  bar"
-        track.link.should == [uri]
+        track.links.should == [uri]
       end
 
       it "returns text and link which contains some URLs" do
@@ -115,14 +115,14 @@ describe Topic do
         input = "foo #{uri1} bar foo #{uri2} bar"
         track = reader.plane(input)
         track.text.should == "foo  bar foo  bar"
-        track.link.should == [uri1, uri2]
+        track.links.should == [uri1, uri2]
       end
     end
 
     describe "news" do
       it "extracts actual URL from Google NEWS fomat URL to redirect" do
         news = reader.news("test")
-        news.link.should == ["http://foo.com/bar.html?id=001"]
+        news.links.should == ["http://foo.com/bar.html?id=001"]
       end
     end
   end
@@ -132,17 +132,17 @@ describe Topic do
 
     describe "to_hash" do
       it "convert text attribute to hash" do
-        st_track.text = "foo"
+        st_track.instance_variable_set(:@text, "foo")
         st_track.to_hash.should == {text: "foo"}
       end
 
       it "convert link attribute to hash" do
-        st_track.link = "foo"
-        st_track.to_hash.should == {link: "foo"}
+        st_track.instance_variable_set(:@links, "foo")
+        st_track.to_hash.should == {links: "foo"}
       end
 
       it "convert video attribute to hash" do
-        st_track.video = "foo"
+        st_track.instance_variable_set(:@video, "foo")
         st_track.to_hash.should == {video: "foo"}
       end
 
@@ -152,11 +152,11 @@ describe Topic do
       end
 
       it "convert text, link and video attribute to hash" do
-        st_track.text = "t"
-        st_track.link = "l"
-        st_track.video = "v"
+        st_track.instance_variable_set(:@text, "t")
+        st_track.instance_variable_set(:@links, "l")
+        st_track.instance_variable_set(:@video, "v")
         st_track.text_decoration = true
-        st_track.to_hash.should == {text: "t", link: "l", video: "v"}
+        st_track.to_hash.should == {text: "t", links: "l", video: "v"}
       end
     end
   end
