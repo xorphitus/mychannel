@@ -21,8 +21,9 @@ group :development do
   gem 'guard-coffeescript'
   gem 'guard-livereload'
   # notify
-  gem 'libnotify'
-  gem 'rb-inotify'
+  gem 'libnotify' if /linux/ =~ RUBY_PLATFORM
+  gem 'rb-inotify' if /linux/ =~ RUBY_PLATFORM
+  gem 'growl' if /darwin/ =~ RUBY_PLATFORM
 end
 
 # db
