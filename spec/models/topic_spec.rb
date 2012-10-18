@@ -128,35 +128,36 @@ describe Topic do
   end
 
   describe Topic::StructuredTrack do
-    let(:st_track) { Topic::StructuredTrack.new }
+    let(:st_track) { Topic::StructuredTrack.new(text, links, video) }
+    subject { st_track.to_hash }
 
     describe "to_hash" do
-      it "convert text attribute to hash" do
-        st_track.instance_variable_set(:@text, "foo")
-        st_track.to_hash.should == {text: "foo"}
+      context "when only text attribute is set" do
+        let(:text) { "foo" }
+        let(:links) { nil }
+        let(:video) { nil }
+        it { should == {text: "foo"} }
       end
 
-      it "convert link attribute to hash" do
-        st_track.instance_variable_set(:@links, "foo")
-        st_track.to_hash.should == {links: "foo"}
+      context "when only link attribute is set" do
+        let(:text) { nil }
+        let(:links) { %w(a b) }
+        let(:video) { nil }
+        it { should == {links: %w(a b)} }
       end
 
-      it "convert video attribute to hash" do
-        st_track.instance_variable_set(:@video, "foo")
-        st_track.to_hash.should == {video: "foo"}
+      context "when only video attribute is set" do
+        let(:text) { nil }
+        let(:links) { nil }
+        let(:video) { "bar" }
+        it { should == {video: "bar"} }
       end
 
-      it "do not convert text_decoration attribute to hash" do
-        st_track.text_decoration = false
-        st_track.to_hash.should == {}
-      end
-
-      it "convert text, link and video attribute to hash" do
-        st_track.instance_variable_set(:@text, "t")
-        st_track.instance_variable_set(:@links, "l")
-        st_track.instance_variable_set(:@video, "v")
-        st_track.text_decoration = true
-        st_track.to_hash.should == {text: "t", links: "l", video: "v"}
+      context "when all attributes: text, link and video are set" do
+        let(:text) { "t" }
+        let(:links) { %w(c d) }
+        let(:video) { "v" }
+        it { should == {text: "t", links: %w(c d), video: "v"} }
       end
     end
   end
