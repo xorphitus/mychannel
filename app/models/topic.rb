@@ -110,7 +110,6 @@ class Topic < ActiveRecord::Base
     end
   end
 
-  private
   def self.select_topic_tree(channel_id)
     topics = Topic.where(channel_id: channel_id)
     raise "Could not find any topics for channel_id = #{channel_id}" if topics.empty?
@@ -123,15 +122,13 @@ class Topic < ActiveRecord::Base
     [topic, tracks]
   end
 
-  private
   def self.aquire_fb_target(me, topic)
     fb_targets = me.send(topic.target.to_sym)
     fb_targets.reject! { |fb_target| fb_target.message.nil? } if %w(home feed).include?(topic.target)
     fb_targets.sample
   end
 
-  private
-  def self.to_story_content(fb_target, tracks)
+  def self.to_story_contents(fb_target, tracks)
     inherited_value = nil
     track_reader = TrackReader.new
 
@@ -154,13 +151,16 @@ class Topic < ActiveRecord::Base
     end
   end
 
+  private_class_method :select_topic_tree, :aquire_fb_target, :to_story_contents
+
+
   def self.to_story(me, channel_id)
     topic, tracks = select_topic_tree(channel_id)
 
     fb_target = aquire_fb_target(me, topic)
     return [({text: "もっとFacebook使ってリア充になって欲しいお"})] if fb_target.nil?
 
-    content = to_story_content(fb_target, tracks)
-    {metadata: {hash: content.hash}, content: content}
+    contents = to_story_contents(fb_target, tracks)
+    {metadata: {hash: contents.hash}, contents: contents}
   end
 end

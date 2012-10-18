@@ -109,7 +109,7 @@ window.audio = (->
         # 2回連続で同じstoryを再生しないためのチェック機構
         loadData callback  if typeof callback is 'function'
       else
-        queue = queue.concat(data.content)
+        queue = queue.concat(data.contents)
         prevStoryHash = data.metadata.hash
         $('#' + LOADING_IMG_ID).hide()
         callback()  if typeof callback is 'function'

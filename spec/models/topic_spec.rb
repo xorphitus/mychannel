@@ -37,7 +37,7 @@ describe Topic do
         json[:metadata].should_not be_nil
         json[:metadata][:hash].should_not be_nil
 
-        contents = json[:content]
+        contents = json[:contents]
         contents.should be_an_instance_of Array
         contents.should have(4).items
 
@@ -67,7 +67,7 @@ describe Topic do
         json[:metadata].should_not be_nil
         json[:metadata][:hash].should_not be_nil
 
-        contents = json[:content]
+        contents = json[:contents]
         contents.should be_an_instance_of Array
         contents.should have(4).items
 
