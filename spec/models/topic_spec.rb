@@ -128,35 +128,34 @@ describe Topic do
   end
 
   describe Topic::StructuredTrack do
-    let(:st_track) { Topic::StructuredTrack.new(text, links, video) }
-    subject { st_track.to_hash }
-
     describe "to_hash" do
       context "when only text attribute is set" do
-        let(:text) { "foo" }
-        let(:links) { nil }
-        let(:video) { nil }
+        subject{ Topic::StructuredTrack.new("foo").to_hash }
         it { should == {text: "foo"} }
       end
 
       context "when only link attribute is set" do
-        let(:text) { nil }
-        let(:links) { %w(a b) }
-        let(:video) { nil }
+        subject{ Topic::StructuredTrack.new(nil, %w(a b)).to_hash }
         it { should == {links: %w(a b)} }
       end
 
       context "when only video attribute is set" do
-        let(:text) { nil }
-        let(:links) { nil }
-        let(:video) { "bar" }
+        subject{ Topic::StructuredTrack.new(nil, nil, "bar").to_hash }
         it { should == {video: "bar"} }
       end
 
+      context "when inheritance and text_decoration are given" do
+        subject do
+          st_track = Topic::StructuredTrack.new
+          st_track.inheritance = true
+          st_track.text_decoration = true
+          st_track.to_hash
+        end
+        it { should == {} }
+      end
+
       context "when all attributes: text, link and video are set" do
-        let(:text) { "t" }
-        let(:links) { %w(c d) }
-        let(:video) { "v" }
+        subject{ Topic::StructuredTrack.new("t", %w(c d), "v").to_hash }
         it { should == {text: "t", links: %w(c d), video: "v"} }
       end
     end
