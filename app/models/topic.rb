@@ -134,14 +134,14 @@ class Topic < ActiveRecord::Base
 
     tracks.map do |track|
       if track.target == "prev"
-        seed = inherited_value
+        fb_attribute = inherited_value
       else
-        seed = fb_target
-        track.target.split(".").each { |token| seed = seed.send(token.to_sym) }
-        inherited_value = seed
+        fb_attribute = fb_target
+        track.target.split(".").each { |attribute_name| fb_attribute = fb_attribute.send(attribute_name.to_sym) }
+        inherited_value = fb_attribute
       end
 
-      structured_track = track_reader.send(track.action.to_sym, seed)
+      structured_track = track_reader.send(track.action.to_sym, fb_attribute)
       json_elem = structured_track.to_hash
       if structured_track.decorate_text?
         inherited_value = structured_track.text if structured_track.inherited?
