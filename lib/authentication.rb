@@ -4,7 +4,7 @@ module Authentication
   AUTH_DURAITION_SEC = 60 * 60 * 24 * 7
 
   def auth_info_key
-    cookies[:mychannel_token]
+    session[:mychannel_token]
   end
 
   # before_filterで呼ぶと認証がかかる
@@ -20,13 +20,13 @@ module Authentication
 
   def login_as fb_user_id, access_token
     expires_sec = Time.now + AUTH_DURAITION_SEC
-    cookies[:mychannel_token] = {value: fb_user_id, expires: expires_sec}
+    session[:mychannel_token] = fb_user_id
     Rails.cache.write(fb_user_id, access_token, expires_in: expires_sec.to_i)
   end
 
   def logout
     Rails.cache.delete(auth_info_key)
-    cookies[:mychannel_token] = {expires: Time.at(0)}
+    reset_session
   end
 
   def authenticated?
