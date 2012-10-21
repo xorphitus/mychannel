@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 
 module Authentication
-  AUTH_DURAITION_SEC = 60 * 60 * 24 * 7
-
-  def auth_info_key
-    session[:mychannel_token]
-  end
+  AUTH_DURAITION_SEC = 60 * 60
 
   # before_filterで呼ぶと認証がかかる
   def require_authentication
-    redirect_to root_url unless Rails.cache.read(auth_info_key)
+    redirect_to root_url if session[:access_token].empty?
   end
 
   def login
@@ -19,24 +15,32 @@ module Authentication
   end
 
   def login_as fb_user_id, access_token
-    expires_sec = Time.now + AUTH_DURAITION_SEC
-    session[:mychannel_token] = fb_user_id
-    Rails.cache.write(fb_user_id, access_token, expires_in: expires_sec.to_i)
+    session[:fb_user_id] = fb_user_id
+    session[:access_token] = access_token
   end
 
   def logout
-    Rails.cache.delete(auth_info_key)
     reset_session
   end
 
   def authenticated?
-    auth_info_key.present? && Rails.cache.read(auth_info_key).present?
+    session[:access_token].present?
   end
 
   # Facebookからログインユーザの情報を取得
   def fb_me
+    fb_user_id = session[:fb_user_id]
+    if fb_user_id.present?
+      me = Rails.cache.read(fb_user_id)
+      return me if me.present?
+    end
+
     begin
-      FbGraph::User.me(Rails.cache.read(auth_info_key)).fetch
+      me = FbGraph::User.me(session[:access_token]).fetch
+      fb_user_id = session[:fb_user_id] = me.identifier
+      expires_sec = Time.now + AUTH_DURAITION_SEC
+      Rails.cache.write(fb_user_id, me, expires_in: expires_sec.to_i)
+      me
     rescue
       logout
       redirect_to root_url
