@@ -25,9 +25,9 @@ class Topic < ActiveRecord::Base
   end
 
   def self.aquire_fb_target(me, topic)
-    fb_targets = me.send(topic.target.to_sym)
-    fb_targets.reject! { |fb_target| fb_target.message.blank? } if %w(home feed).include?(topic.target)
-    fb_targets.sample
+    me.send(topic.target.to_sym)
+      .reject { |fb_target| %w(home feed).include?(topic.target) && fb_target.message.blank? }
+      .sample
   end
 
   def self.to_story_contents(fb_target, tracks)

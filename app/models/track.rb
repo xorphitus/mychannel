@@ -30,12 +30,10 @@ class Track < ActiveRecord::Base
     end
 
     def to_hash
-      hash = {}
-      [:text, :links, :video].each do |attr|
-        value = self.send(attr)
-        hash[attr] = value if value.present?
-      end
-      hash
+      Hash[
+           [:text, :links, :video].map { |attr| [attr, self.send(attr)] }
+             .select { |k, v| v.present? }
+          ]
     end
 
     def self.missing_track(text)
