@@ -19,7 +19,7 @@ class Topic < ActiveRecord::Base
     topic = topics.sample
     # productionのMySQLだと想定の順序になってくれないのでひとまずidでorder
     tracks = topic.tracks.order(:id)
-    raise "Could not find any tras for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.empty?
+    raise "Could not find any tracks for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.empty?
 
     [topic, tracks]
   end
@@ -49,12 +49,11 @@ class Topic < ActiveRecord::Base
 
   private_class_method :select_topic_tree, :aquire_fb_target, :to_story_contents
 
-
   def self.to_story(me, channel_id)
     topic, tracks = select_topic_tree(channel_id)
 
     fb_target = aquire_fb_target(me, topic)
-    return [({text: "もっとFacebook使ってリア充になって欲しいお"})] if fb_target.nil?
+    return [text: "もっとFacebook使ってリア充になって欲しいお"] if fb_target.nil?
 
     contents = to_story_contents(fb_target, tracks)
     {metadata: {hash: contents.hash}, contents: contents}
