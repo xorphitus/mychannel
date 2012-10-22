@@ -9,7 +9,7 @@ class Voice
   # max_lenを越える文字列の場合, suffixを含めて文字数がmax_lenとなるように切り詰める
   def self.limit(str, max_len, suffix)
     if str.size > max_len
-      if suffix.nil?
+      if suffix.blank?
         return str[0, max_len]
       else
         return str[0, max_len - suffix.size + 1] + suffix

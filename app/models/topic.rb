@@ -14,19 +14,19 @@ class Topic < ActiveRecord::Base
 
   def self.select_topic_tree(channel_id)
     topics = Topic.where(channel_id: channel_id)
-    raise "Could not find any topics for channel_id = #{channel_id}" if topics.empty?
+    raise "Could not find any topics for channel_id = #{channel_id}" if topics.blank?
 
     topic = topics.sample
     # productionのMySQLだと想定の順序になってくれないのでひとまずidでorder
     tracks = topic.tracks.order(:id)
-    raise "Could not find any tracks for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.empty?
+    raise "Could not find any tracks for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.blank?
 
     [topic, tracks]
   end
 
   def self.aquire_fb_target(me, topic)
     fb_targets = me.send(topic.target.to_sym)
-    fb_targets.reject! { |fb_target| fb_target.message.nil? } if %w(home feed).include?(topic.target)
+    fb_targets.reject! { |fb_target| fb_target.message.blank? } if %w(home feed).include?(topic.target)
     fb_targets.sample
   end
 
@@ -53,7 +53,7 @@ class Topic < ActiveRecord::Base
     topic, tracks = select_topic_tree(channel_id)
 
     fb_target = aquire_fb_target(me, topic)
-    return [text: "もっとFacebook使ってリア充になって欲しいお"] if fb_target.nil?
+    return [text: "もっとFacebook使ってリア充になって欲しいお"] if fb_target.blank?
 
     contents = to_story_contents(fb_target, tracks)
     {metadata: {hash: contents.hash}, contents: contents}

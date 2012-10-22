@@ -53,7 +53,7 @@ class Track < ActiveRecord::Base
     def self.plane(val)
       text = val
       urls = URI.extract(val).select { |uri| uri.match(/^(https?|ftp)/) }
-      unless urls.empty?
+      unless urls.blank?
         urls.each do |url|
           text = text.gsub!(url, "")
         end
@@ -72,18 +72,18 @@ class Track < ActiveRecord::Base
       relations = Nokogiri::XML(open("http://search.yahooapis.jp/AssistSearchService/V1/webunitSearch?appid=#{Settings.yahoo.app_id}&query=#{URI.encode(val)}"))
       targets = relations.css("Result").map { |node| node.content }
 
-      return StructuredTrack.missing_track("とくに連想するものはありませんが") if targets.empty?
+      return StructuredTrack.missing_track("とくに連想するものはありませんが") if targets.blank?
 
       # 'hogehogeとは' は関連ワードじゃないので除去
       relational_words = targets.sample.split(" ").reject { |item| [val.downcase, "#{val.downcase}とは"].include?(item.downcase) }
-      relational_words.empty? ? StructuredTrack.missing_track("とくに連想するものはありませんが") : StructuredTrack.new(text: relational_words.sample)
+      relational_words.blank? ? StructuredTrack.missing_track("とくに連想するものはありませんが") : StructuredTrack.new(text: relational_words.sample)
     end
 
     def self.news(val)
       rss = SimpleRSS.parse(open("https://news.google.com/news/feeds?ned=us&ie=UTF-8&oe=UTF-8&q=#{URI.encode(val)}&lr&output=atom&num=5&hl=ja"))
       news = rss.entries.sample
 
-      return StructuredTrack.missing_track("関連ニュースはないみたいです") if news.nil?
+      return StructuredTrack.missing_track("関連ニュースはないみたいです") if news.blank?
 
       text = news.title
       link = CGI::unescapeHTML(news.link)
