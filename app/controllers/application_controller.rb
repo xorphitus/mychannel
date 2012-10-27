@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 class ApplicationController < ActionController::Base
-  include Authentication
   protect_from_forgery
 
   helper_method :fb_me
@@ -24,5 +23,15 @@ class ApplicationController < ActionController::Base
       logout
       redirect_to root_url
     end
+  end
+
+  private
+  # before_filterで呼ぶと認証がかかる
+  def require_authentication
+    redirect_to new_session_url unless authenticated?
+  end
+
+  def authenticated?
+    session[:access_token].present?
   end
 end
