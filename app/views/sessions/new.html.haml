@@ -2,14 +2,6 @@
   %h1 まいちゃんねるにようこそ
   %p 完全パーソナライズドなラジオ (プラス、視覚要素を少々) をお届け
   %fb:login-button{length: "long", onlogin: "signIn();", scope: "user_about_me,read_stream"}
-%script{src: "http://connect.facebook.net/ja_JP/all.js"}
-:javascript
-  FB.init({
-    appId: '#{Settings.fb.app_id}',
-    cookie: true,
-    xfbml: true,
-    oauth: true
-  });
 
 %div.row
   %div.alert.alert-block.span7.offset2
@@ -18,3 +10,13 @@
       %li Internet Explorer 9 および Google Chrome でのみ動作確認しています
       %li ログインすると音声が流れます
       %li 萌え萌えマスコットキャラクター「まいちゃん」等の類はご用意しておりません
+
+- content_for :javascript_initializer do
+  %script{src: "http://connect.facebook.net/ja_JP/all.js"}
+  :javascript
+    FB.init({
+      appId: '#{Settings.fb.app_id}',
+      cookie: true,
+      xfbml: true,
+      oauth: true
+    });

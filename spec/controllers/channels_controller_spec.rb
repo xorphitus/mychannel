@@ -23,11 +23,9 @@ describe ChannelsController do
 
       it { response.should be_success }
 
-      it "assigns pairs of name and ID number to channel_list" do
-        assigns[:channel_list].each do |channel|
-          channel.size.should == 2
-          channel[0].should be_an_instance_of String
-          channel[1].should be_an_instance_of Fixnum
+      it "assigns channels which is published" do
+        assigns[:channels].each do |channel|
+          channel.publish_flag.should be_true
         end
       end
     end
