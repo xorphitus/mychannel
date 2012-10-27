@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'spec_helper'
 
-describe DashboardController do
+describe ChannelsController do
   describe "index" do
     before do
       me_json = File.new(Rails.root.join("spec/webmocks/fb_me.json"))

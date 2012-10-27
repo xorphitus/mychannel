@@ -5,7 +5,7 @@ module Authentication
 
   # before_filterで呼ぶと認証がかかる
   def require_authentication
-    redirect_to root_url if session[:access_token].blank?
+    redirect_to new_session_url if session[:access_token].blank?
   end
 
   def login

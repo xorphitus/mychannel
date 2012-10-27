@@ -2,7 +2,7 @@ describe 'linkDisplay', ->
   describe 'function "add"', ->
     linkDisplayExpr = '#link_display'
     beforeEach ->
-      loadFixtures 'dashboard.html'
+      loadFixtures 'channels.html'
 
     it 'adds a link to a link display area', ->
       links = ['http://foo.com/']
@@ -44,7 +44,7 @@ describe 'linkDisplay', ->
 describe 'channelSelector', ->
   channelSelectorExpr = '#channel_selector'
   beforeEach ->
-    loadFixtures 'dashboard.html'
+    loadFixtures 'channels.html'
 
   describe 'getId', ->
     it 'returns the only channel id when it has only one option', ->
@@ -58,7 +58,7 @@ describe 'channelSelector', ->
 # TODO 何故かfixtureを読み込んでも<audio>のDOMが作られない様子
 # describe 'audio', ->
 #   beforeEach ->
-#     loadFixtures 'dashboard.html'
+#     loadFixtures 'channels.html'
 #
 #   describe 'play', ->
 #     it 'sets a sound source', ->

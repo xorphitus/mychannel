@@ -5,7 +5,7 @@
       var linkDisplayExpr;
       linkDisplayExpr = '#link_display';
       beforeEach(function() {
-        return loadFixtures('dashboard.html');
+        return loadFixtures('channels.html');
       });
       it('adds a link to a link display area', function() {
         var a, expected, icon, li, links;
@@ -50,7 +50,7 @@
     var channelSelectorExpr;
     channelSelectorExpr = '#channel_selector';
     beforeEach(function() {
-      return loadFixtures('dashboard.html');
+      return loadFixtures('channels.html');
     });
     return describe('getId', function() {
       it('returns the only channel id when it has only one option', function() {

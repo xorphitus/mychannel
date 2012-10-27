@@ -12,7 +12,7 @@
 #
 src_files:
   - assets/application.js
-  - assets/dashboard.js
+  - assets/channels.js
 
 # stylesheets
 #

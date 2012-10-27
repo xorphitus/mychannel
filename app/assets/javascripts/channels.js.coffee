@@ -11,17 +11,17 @@ window.video =
     flashVersion = '8'
     targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer'
     if player
-      player.loadVideoByUrl targetUrl
+      player.loadVideoByUrl(targetUrl)
     else
       video.onFinish = callback
-      swfobject.embedSWF targetUrl, id, width, height, flashVersion, null, null, params, atts
+      swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts)
 
   onPlayerStateChange: (state) ->
-    video.onFinish()  if state is 0
+    video.onFinish() if state is 0
 
 window.onYouTubePlayerReady = ->
   player = document.getElementById(video.PLAYER_ID)
-  player.addEventListener 'onStateChange', 'video.onPlayerStateChange'
+  player.addEventListener('onStateChange', 'video.onPlayerStateChange')
   player.playVideo()
 
 window.linkDisplay = (->
@@ -36,15 +36,15 @@ window.linkDisplay = (->
         target: '_blank'
       ).addClass('btn btn-link')
       text = i
-      text = text.substring(0, LINK_TEXT_MAX_SIZE) + '...'  if text.length > LINK_TEXT_MAX_SIZE
+      text = text.substring(0, LINK_TEXT_MAX_SIZE) + '...' if text.length > LINK_TEXT_MAX_SIZE
       a.text text
-      $('#' + LINK_DISPLAY_ID).prepend li.append(icon).append(a)
+      $('#' + LINK_DISPLAY_ID).prepend(li.append(icon).append(a))
 )()
 
 window.channelSelector = (->
   CHANNEL_SELECTOR_ID = 'channel_selector'
   selector = $('#' + CHANNEL_SELECTOR_ID)
-  selector.fadeIn()  if selector.find('option').size() > 1
+  selector.fadeIn() if selector.find('option').size() > 1
   getId: ->
     $('#' + CHANNEL_SELECTOR_ID).val()
 )()
@@ -83,14 +83,14 @@ window.audio = (->
         loadData exec
         return
     if target.text
-      $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown 'fast'
+      $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast')
       # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
       encodedText = encodeURIComponent(target.text.replace(/\./g, ' '))
-      encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH))  if encodedText.length > WEBRIC_URL_MAX_LENGTH
+      encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH)) if encodedText.length > WEBRIC_URL_MAX_LENGTH
       audio.play '/voices/' + encodedText, ->
         exec queue.shift()
 
-      linkDisplay.add target.links if target.links
+      linkDisplay.add(target.links) if target.links
     else if target.video
       $('#' + video.ID).slideDown()
       video.play target.video[0].url, ->
@@ -104,21 +104,21 @@ window.audio = (->
   prevStoryHash = null
   loadData = (callback) ->
     $('#' + LOADING_IMG_ID).show()
-    $.get '/stories/' + channelId, (data) ->
+    $.get '/channels/' + channelId, (data) ->
       if data.metadata.hash is prevStoryHash
         # 2回連続で同じstoryを再生しないためのチェック機構
-        loadData callback  if typeof callback is 'function'
+        loadData callback if typeof callback is 'function'
       else
         queue = queue.concat(data.contents)
         prevStoryHash = data.metadata.hash
         $('#' + LOADING_IMG_ID).hide()
-        callback()  if typeof callback is 'function'
+        callback() if typeof callback is 'function'
 
   $('#' + PLAY_BTN_ID).click ->
     channelId = channelSelector.getId()
     if channelId
       setInterval (->
-        loadData()  if queue.length < QUEUE_SIZE
+        loadData() if queue.length < QUEUE_SIZE
       ), LOAD_INTERVAL_MILLIS
       exec()
     else
