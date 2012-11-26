@@ -74,13 +74,14 @@ window.audio = (->
   QUEUE_SIZE = 3
 
   queue = []
-  exec = (t) ->
-    target = t
+  # TODO この関数が長い それからexecっていう名前がイマイチ
+  exec = (targetCandidate) ->
+    target = targetCandidate
     unless target
       if queue and queue.length > 0
         target = queue.shift()
       else
-        loadData exec
+        loadData(exec)
         return
     if target.text
       $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast')
@@ -88,7 +89,7 @@ window.audio = (->
       encodedText = encodeURIComponent(target.text.replace(/\./g, ' '))
       encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH)) if encodedText.length > WEBRIC_URL_MAX_LENGTH
       audio.play '/voices/' + encodedText, ->
-        exec queue.shift()
+        exec(queue.shift())
 
       linkDisplay.add(target.links) if target.links
     else if target.video
@@ -96,9 +97,9 @@ window.audio = (->
       video.play target.video[0].url, ->
         # TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
         # $('#' + video.ID).slideUp();
-        exec queue.shift()
+        exec(queue.shift())
     else
-      exec queue.shift()
+      exec(queue.shift())
 
   channelId = null
   prevStoryHash = null
@@ -107,7 +108,7 @@ window.audio = (->
     $.get '/channels/' + channelId, (data) ->
       if data.metadata.hash is prevStoryHash
         # 2回連続で同じstoryを再生しないためのチェック機構
-        loadData callback if typeof callback is 'function'
+        loadData(callback) if typeof callback is 'function'
       else
         queue = queue.concat(data.contents)
         prevStoryHash = data.metadata.hash
@@ -122,5 +123,5 @@ window.audio = (->
       ), LOAD_INTERVAL_MILLIS
       exec()
     else
-      alert '番組を選んで下さい'
+      alert('番組を選んで下さい')
 )()
