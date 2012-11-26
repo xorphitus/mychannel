@@ -17,7 +17,8 @@ describe ChannelsController do
 
     context "when a request is authenticated" do
       before do
-        controller.login_as("foo", "bar")
+        # dummy login
+        session[:access_token] = "dummy_token"
         get :index
       end
 

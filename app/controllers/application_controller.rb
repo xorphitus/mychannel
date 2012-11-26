@@ -20,8 +20,8 @@ class ApplicationController < ActionController::Base
       Rails.cache.write(fb_user_id, me, expires_in: expires_sec.to_i)
       me
     rescue
-      logout
-      redirect_to root_url
+      reset_session
+      redirect_to new_session_url
     end
   end
 

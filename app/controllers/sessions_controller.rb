@@ -4,10 +4,14 @@ class SessionsController < ApplicationController
 
   # display login page
   def new
+    respond_to do |format|
+      format.html
+    end
   end
 
   def create
     login
+
     respond_to do |format|
       format.json { head :no_content }
     end
@@ -15,8 +19,11 @@ class SessionsController < ApplicationController
 
   # logout
   def destroy
-    logout
-    redirect_to root_url
+    reset_session
+
+    respond_to do |format|
+      format.html { redirect_to new_session_url }
+    end
   end
 
   private
@@ -29,10 +36,6 @@ class SessionsController < ApplicationController
   def login_as fb_user_id, access_token
     session[:fb_user_id] = fb_user_id
     session[:access_token] = access_token
-  end
-
-  def logout
-    reset_session
   end
 
   def require_not_authentication
