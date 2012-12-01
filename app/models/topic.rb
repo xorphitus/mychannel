@@ -12,27 +12,17 @@ class Topic < ActiveRecord::Base
   validates :target, presence: true
   validates :target_text, length: {maximum: 100}
 
-  def self.select_topic_tree(channel_id)
-    topics = Topic.where(channel_id: channel_id)
-    raise "Could not find any topics for channel_id = #{channel_id}" if topics.blank?
+  def to_story_contents(me)
+    fb_target = aquire_fb_target(me)
+    return [text: "もっとFacebook使ってリア充になって欲しいお"] if fb_target.blank?
 
-    topic = topics.sample
     # productionのMySQLだと想定の順序になってくれないのでひとまずidでorder
-    tracks = topic.tracks.order(:id)
+    tracks = self.tracks.order(:id)
     raise "Could not find any tracks for channel_id = #{channel_id}, topic_id = #{topic.id}" if tracks.blank?
 
-    [topic, tracks]
-  end
-
-  def self.aquire_fb_target(me, topic)
-    me.send(topic.target.to_sym)
-      .reject { |fb_target| %w(home feed).include?(topic.target) && fb_target.message.blank? }
-      .sample
-  end
-
-  def self.to_story_contents(fb_target, tracks)
     inherited_value = nil
 
+    # TODO ここの可読性が低い
     tracks.map do |track|
       if track.target == "prev"
         fb_attribute = inherited_value
@@ -47,15 +37,10 @@ class Topic < ActiveRecord::Base
     end
   end
 
-  private_class_method :select_topic_tree, :aquire_fb_target, :to_story_contents
-
-  def self.to_story(me, channel_id)
-    topic, tracks = select_topic_tree(channel_id)
-
-    fb_target = aquire_fb_target(me, topic)
-    return [text: "もっとFacebook使ってリア充になって欲しいお"] if fb_target.blank?
-
-    contents = to_story_contents(fb_target, tracks)
-    {metadata: {hash: contents.hash}, contents: contents}
+  private
+  def aquire_fb_target(me)
+    me.send(self.target.to_sym)
+      .reject { |fb_target| %w(home feed).include?(self.target) && fb_target.message.blank? }
+      .sample
   end
 end

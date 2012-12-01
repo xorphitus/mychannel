@@ -13,8 +13,10 @@ class ChannelsController < ApplicationController
   # 番組として再生する内容 (story) をJSONデータとして返却する
   # クライアント (View層のラジオプレイヤー) はこのJSONデータに基づいて番組の再生をする
   def show
+    @channel = Channel.find(params[:id])
+
     respond_to do |format|
-      format.json { render json: Topic.to_story(fb_me, params[:id]) }
+      format.json { render json: @channel.to_story(fb_me) }
     end
   end
 end

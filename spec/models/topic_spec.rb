@@ -15,14 +15,14 @@ describe Topic do
     WebMock.stub_request(:get, /graph\.facebook\.com\/me\/home/).to_return(body: to_file("fb_home.json"))
   end
 
-  describe "to_story" do
+  describe "to_story_contents" do
     let(:user) { Fabricate(:user) }
+    let(:channel) { Fabricate(:channel, user: user) }
 
-    context "with a right channel_id which contains a topic about 'feed'" do
-      let(:channel) { Fabricate(:channel, user: user) }
+    context "with a topic about 'feed'" do
+      let(:topic) { Fabricate(:topic00, channel: channel) }
 
       before do
-        topic = Fabricate(:topic00, channel: channel)
         Fabricate(:track00, topic: topic)
         Fabricate(:track01, topic: topic)
         Fabricate(:track02, topic: topic)
@@ -30,14 +30,8 @@ describe Topic do
       end
 
       it "returns an array which has some Hashes" do
-        json = Topic.to_story(FbGraph::User.me(nil), channel.id)
+        contents = topic.to_story_contents(FbGraph::User.me(nil))
 
-        json.should be_an_instance_of Hash
-
-        json[:metadata].should_not be_nil
-        json[:metadata][:hash].should_not be_nil
-
-        contents = json[:contents]
         contents.should be_an_instance_of Array
         contents.should have(4).items
 
@@ -48,11 +42,10 @@ describe Topic do
       end
     end
 
-    context "with a right channel_id which contains a topic about 'home'" do
-      let(:channel) { Fabricate(:channel, user: user) }
+    context "with a topic about 'home'" do
+      let(:topic) { Fabricate(:topic01, channel: channel) }
 
       before do
-        topic = Fabricate(:topic01, channel: channel)
         Fabricate(:track10, topic: topic)
         Fabricate(:track11, topic: topic)
         Fabricate(:track12, topic: topic)
@@ -60,14 +53,8 @@ describe Topic do
       end
 
       it "returns an array which has some Hashes" do
-        json = Topic.to_story(FbGraph::User.me(nil), channel.id)
+        contents = topic.to_story_contents(FbGraph::User.me(nil))
 
-        json.should be_an_instance_of Hash
-
-        json[:metadata].should_not be_nil
-        json[:metadata][:hash].should_not be_nil
-
-        contents = json[:contents]
         contents.should be_an_instance_of Array
         contents.should have(4).items
 
@@ -78,16 +65,9 @@ describe Topic do
       end
     end
 
-    context "with a wrong channel_id" do
-      let(:undefined_channel_id) { 1 }
-      subject { lambda { Topic.to_story(FbGraph::User.me(nil), undefined_channel_id) } }
-      it { should raise_error }
-    end
-
-    context "with a channel_id which has no tracks" do
-      let(:channel) { Fabricate(:channel, user: user) }
-      before { Fabricate(:topic00, channel: channel) }
-      subject { lambda { Topic.to_story(FbGraph::User.me(nil), channel.id) } }
+    context "with a topic which has no tracks" do
+      let(:topic) { Fabricate(:topic00, channel: channel) }
+      subject { lambda { topic.to_story_contents(FbGraph::User.me(nil)) } }
       it { should raise_error }
     end
   end
