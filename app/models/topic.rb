@@ -22,17 +22,8 @@ class Topic < ActiveRecord::Base
 
     inherited_value = nil
 
-    # TODO ここの可読性が低い
     tracks.map do |track|
-      if track.target == "prev"
-        fb_attribute = inherited_value
-      else
-        fb_attribute = fb_target
-        track.target.split(".").each { |attribute_name| fb_attribute = fb_attribute.send(attribute_name.to_sym) }
-        inherited_value = fb_attribute
-      end
-
-      json_elem, inherited_value = track.to_json_element(fb_attribute, inherited_value)
+      json_elem, inherited_value = track.to_json_element(fb_target, inherited_value)
       json_elem
     end
   end

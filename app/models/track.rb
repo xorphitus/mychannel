@@ -17,8 +17,7 @@ class Track < ActiveRecord::Base
       @text = args[:text]
       @links = args[:links]
       @video = args[:video]
-      @text_decoration = true
-      @inheritance = true
+      @text_decoration = @inheritance = true
     end
 
     def decorate_text?
@@ -36,12 +35,13 @@ class Track < ActiveRecord::Base
           ]
     end
 
+    def to_false
+      @text_decoration = @inheritance = false
+    end
+
     def self.missing_track(text)
       st_track = StructuredTrack.new(text: text)
-      st_track.instance_eval do
-        @text_decoration = false
-        @inheritance = false
-      end
+      st_track.to_false
       st_track
     end
   end
@@ -100,7 +100,9 @@ class Track < ActiveRecord::Base
     end
   end
 
-  def to_json_element(fb_attribute, inherited_value)
+  def to_json_element(fb_target, prev_value)
+    fb_attribute = inherited_value = fb_attribute(fb_target, prev_value)
+
     structured_track = TrackReader.send(self.action.to_sym, fb_attribute)
     json_elem = structured_track.to_hash
     if structured_track.decorate_text?
@@ -108,5 +110,17 @@ class Track < ActiveRecord::Base
       json_elem[:text] = "#{self.pre_content}#{inherited_value}#{self.post_content}"
     end
     [json_elem, inherited_value]
+  end
+
+  private
+  def fb_attribute(fb_target, prev_value)
+    self.target == "prev" ? prev_value : explore_fb_attribute(self.target.split("."), fb_target)
+  end
+
+  def explore_fb_attribute(attribute_names, fb_attribute)
+    return fb_attribute if attribute_names.blank?
+
+    attribute_name = attribute_names.shift()
+    explore_fb_attribute(attribute_names, fb_attribute.send(attribute_name))
   end
 end
