@@ -27,6 +27,7 @@ window.onYouTubePlayerReady = ->
 window.linkDisplay = (->
   LINK_DISPLAY_ID = 'link_display'
   LINK_TEXT_MAX_SIZE = 50
+
   add: (links) ->
     links.forEach (i) ->
       li = $('<li>')
@@ -42,21 +43,25 @@ window.linkDisplay = (->
 
 window.channelSelector = (->
   CHANNEL_SELECTOR_ID = 'channel_selector'
+
   selector = $('#' + CHANNEL_SELECTOR_ID)
   selector.fadeIn() if selector.find('option').size() > 1
+
   getId: ->
     $('#' + CHANNEL_SELECTOR_ID).val()
 )()
 
 window.audio = (->
+  AUDIO_CONTENT_TYPE = 'audio/mpeg'
+
   audioElem = $('audio:first')
   audioObj = audioElem.get(0)
-  AUDIO_CONTENT_TYPE = 'audio/mpeg'
   if typeof audioObj.canPlayType isnt 'function' or not audioObj.canPlayType(AUDIO_CONTENT_TYPE)
     audiojs.events.ready ->
       as = audiojs.createAll()
 
     alert 'ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも'
+
   play: (src, callback) ->
     audioElem.attr('src', src).bind('ended', ->
       audioElem.unbind('ended')
@@ -115,7 +120,7 @@ window.audio = (->
       queue = queue.concat(dataArray)
 
     isFilled: ->
-      queue.length < QUEUE_SIZE
+      queue.length >= QUEUE_SIZE
   )()
 
   channelId = null
