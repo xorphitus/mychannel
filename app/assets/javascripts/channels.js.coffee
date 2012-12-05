@@ -65,9 +65,8 @@ window.audio = (->
 )()
 
 (->
-  PLAY_BTN_ID = 'play_btn'
   LOAD_INTERVAL_MILLIS = 3000
-  QUEUE_SIZE = 3
+  PLAY_BTN_ID = 'play_btn'
 
   renderer = (->
     TEXT_DISPLAY_ID = 'textdisplay'
@@ -81,7 +80,7 @@ window.audio = (->
       encodedText = encodeURIComponent(text)
       encodedText = encodeURIComponent(text.substring(0, READ_TEXT_MAX_LENGTH)) if encodedText.length > WEBRIC_URL_MAX_LENGTH
       audio.play( '/voices/' + encodedText, ->
-        exec(queue.shift())
+        executor.execNext()
       )
 
       linkDisplay.add(target.links) if target.links
@@ -91,26 +90,33 @@ window.audio = (->
       video.play(target.video[0].url, ->
         # TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
         # $('#' + video.ID).slideUp();
-        exec(queue.shift())
+        executor.execNext()
       )
   )()
 
-  queue = []
-  # TODO execっていう名前がイマイチ
-  exec = (targetCandidate) ->
-    target = targetCandidate
-    unless target
-      if queue.length > 0
-        target = queue.shift()
+  # TODO このクロージャのあたりの名前がイマイチ
+  executor = (->
+    QUEUE_SIZE = 3
+    queue = []
+
+    exec: ->
+      if queue.length > 0 then executor.execNext() else loadData(executor.exec)
+
+    execNext: ->
+      target = queue.shift()
+      if target.text
+        renderer.renderText(target)
+      else if target.video
+        renderer.renderVideo(target)
       else
-        loadData(exec)
-        return
-    if target.text
-      renderer.renderText(target)
-    else if target.video
-      renderer.renderVideo(target)
-    else
-      exec(queue.shift())
+        executor.execNext()
+
+    push: (dataArray) ->
+      queue = queue.concat(dataArray)
+
+    isFilled: ->
+      queue.length < QUEUE_SIZE
+  )()
 
   channelId = null
 
@@ -125,7 +131,7 @@ window.audio = (->
           # 2回連続で同じstoryを再生しないためのチェック機構
           loadData(callback) if typeof callback is 'function'
         else
-          queue = queue.concat(data.contents)
+          executor.push(data.contents)
           prevStoryHash = data.metadata.hash
           $('#' + LOADING_IMG_ID).hide()
           callback() if typeof callback is 'function'
@@ -135,9 +141,9 @@ window.audio = (->
     channelId = channelSelector.getId()
     if channelId
       setInterval (->
-        loadData() if queue.length < QUEUE_SIZE
+        loadData() unless executor.isFilled()
       ), LOAD_INTERVAL_MILLIS
-      exec()
+      executor.exec()
     else
       alert('番組を選んで下さい')
 )()
