@@ -35,9 +35,8 @@ window.linkDisplay = (->
         href: i
         target: '_blank'
       ).addClass('btn btn-link')
-      text = i
-      text = text.substring(0, LINK_TEXT_MAX_SIZE) + '...' if text.length > LINK_TEXT_MAX_SIZE
-      a.text text
+      text = if i.length <= LINK_TEXT_MAX_SIZE then i else i.substring(0, LINK_TEXT_MAX_SIZE) + '...'
+      a.text(text)
       $('#' + LINK_DISPLAY_ID).prepend(li.append(icon).append(a))
 )()
 
@@ -59,61 +58,78 @@ window.audio = (->
 
     alert 'ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも'
   play: (src, callback) ->
-    audioElem.attr('src', src).bind 'ended', ->
-      audioElem.unbind 'ended'
+    audioElem.attr('src', src).bind('ended', ->
+      audioElem.unbind('ended')
       callback()
+    )
 )()
 
 (->
-  LOADING_IMG_ID = 'loadingimg'
-  TEXT_DISPLAY_ID = 'textdisplay'
   PLAY_BTN_ID = 'play_btn'
-  WEBRIC_URL_MAX_LENGTH = 1000
-  READ_TEXT_MAX_LENGTH = 100
   LOAD_INTERVAL_MILLIS = 3000
   QUEUE_SIZE = 3
 
+  renderer = (->
+    TEXT_DISPLAY_ID = 'textdisplay'
+    WEBRIC_URL_MAX_LENGTH = 1000
+    READ_TEXT_MAX_LENGTH = 100
+
+    renderText: (target) ->
+      $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast')
+      # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
+      text = target.text.replace(/\./g, ' ')
+      encodedText = encodeURIComponent(text)
+      encodedText = encodeURIComponent(text.substring(0, READ_TEXT_MAX_LENGTH)) if encodedText.length > WEBRIC_URL_MAX_LENGTH
+      audio.play( '/voices/' + encodedText, ->
+        exec(queue.shift())
+      )
+
+      linkDisplay.add(target.links) if target.links
+
+    renderVideo: (target) ->
+      $('#' + video.ID).slideDown()
+      video.play(target.video[0].url, ->
+        # TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
+        # $('#' + video.ID).slideUp();
+        exec(queue.shift())
+      )
+  )()
+
   queue = []
-  # TODO この関数が長い それからexecっていう名前がイマイチ
+  # TODO execっていう名前がイマイチ
   exec = (targetCandidate) ->
     target = targetCandidate
     unless target
-      if queue and queue.length > 0
+      if queue.length > 0
         target = queue.shift()
       else
         loadData(exec)
         return
     if target.text
-      $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast')
-      # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
-      encodedText = encodeURIComponent(target.text.replace(/\./g, ' '))
-      encodedText = encodeURIComponent(target.text.substring(0, READ_TEXT_MAX_LENGTH)) if encodedText.length > WEBRIC_URL_MAX_LENGTH
-      audio.play '/voices/' + encodedText, ->
-        exec(queue.shift())
-
-      linkDisplay.add(target.links) if target.links
+      renderer.renderText(target)
     else if target.video
-      $('#' + video.ID).slideDown()
-      video.play target.video[0].url, ->
-        # TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
-        # $('#' + video.ID).slideUp();
-        exec(queue.shift())
+      renderer.renderVideo(target)
     else
       exec(queue.shift())
 
   channelId = null
-  prevStoryHash = null
-  loadData = (callback) ->
-    $('#' + LOADING_IMG_ID).show()
-    $.get '/channels/' + channelId, (data) ->
-      if data.metadata.hash is prevStoryHash
-        # 2回連続で同じstoryを再生しないためのチェック機構
-        loadData(callback) if typeof callback is 'function'
-      else
-        queue = queue.concat(data.contents)
-        prevStoryHash = data.metadata.hash
-        $('#' + LOADING_IMG_ID).hide()
-        callback() if typeof callback is 'function'
+
+  loadData = (->
+    LOADING_IMG_ID = 'loadingimg'
+    prevStoryHash = null
+
+    (callback) ->
+      $('#' + LOADING_IMG_ID).show()
+      $.get '/channels/' + channelId, (data) ->
+        if data.metadata.hash is prevStoryHash
+          # 2回連続で同じstoryを再生しないためのチェック機構
+          loadData(callback) if typeof callback is 'function'
+        else
+          queue = queue.concat(data.contents)
+          prevStoryHash = data.metadata.hash
+          $('#' + LOADING_IMG_ID).hide()
+          callback() if typeof callback is 'function'
+  )()
 
   $('#' + PLAY_BTN_ID).click ->
     channelId = channelSelector.getId()
