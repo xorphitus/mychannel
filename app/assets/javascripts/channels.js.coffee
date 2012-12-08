@@ -53,14 +53,13 @@ window.channelSelector = (->
 
 window.audio = (->
   AUDIO_CONTENT_TYPE = 'audio/mpeg'
-
   audioElem = $('audio:first')
   audioObj = audioElem.get(0)
   if typeof audioObj.canPlayType isnt 'function' or not audioObj.canPlayType(AUDIO_CONTENT_TYPE)
     audiojs.events.ready ->
       as = audiojs.createAll()
 
-    alert 'ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも'
+    alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも')
 
   play: (src, callback) ->
     audioElem.attr('src', src).bind('ended', ->
@@ -69,25 +68,34 @@ window.audio = (->
     )
 )()
 
+config = Object.create(null,
+  LOAD_INTERVAL_MILLIS:
+    value: 3000
+  QUEUE_SIZE:
+    value: 3
+  WEBRIC_URL_MAX_LENGTH:
+    value: 1000
+  READ_TEXT_MAX_LENGTH:
+    value: 100
+)
+
 (->
-  LOAD_INTERVAL_MILLIS = 3000
   PLAY_BTN_ID = 'play_btn'
 
   renderer = (->
     TEXT_DISPLAY_ID = 'textdisplay'
-    WEBRIC_URL_MAX_LENGTH = 1000
-    READ_TEXT_MAX_LENGTH = 100
+
+    encodeForRequest = (text) ->
+      # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
+      normalizedText = text.replace(/\./g, ' ')
+      encodedText = encodeURIComponent(normalizedText)
+      encodeURIComponent(normalizedText.substring(0, config.READ_TEXT_MAX_LENGTH)) if encodedText.length > config.WEBRIC_URL_MAX_LENGTH
 
     renderText: (target) ->
       $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast')
-      # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
-      text = target.text.replace(/\./g, ' ')
-      encodedText = encodeURIComponent(text)
-      encodedText = encodeURIComponent(text.substring(0, READ_TEXT_MAX_LENGTH)) if encodedText.length > WEBRIC_URL_MAX_LENGTH
-      audio.play( '/voices/' + encodedText, ->
+      audio.play( '/voices/' + encodeForRequest(target.text), ->
         executor.execNext()
       )
-
       linkDisplay.add(target.links) if target.links
 
     renderVideo: (target) ->
@@ -101,7 +109,6 @@ window.audio = (->
 
   # TODO このクロージャのあたりの名前がイマイチ
   executor = (->
-    QUEUE_SIZE = 3
     queue = []
 
     exec: ->
@@ -120,10 +127,8 @@ window.audio = (->
       queue = queue.concat(dataArray)
 
     isFilled: ->
-      queue.length >= QUEUE_SIZE
+      queue.length >= config.QUEUE_SIZE
   )()
-
-  channelId = null
 
   loadData = (->
     LOADING_IMG_ID = 'loadingimg'
@@ -131,7 +136,7 @@ window.audio = (->
 
     (callback) ->
       $('#' + LOADING_IMG_ID).show()
-      $.get '/channels/' + channelId, (data) ->
+      $.get('/channels/' + channelSelector.getId(), (data) ->
         if data.metadata.hash is prevStoryHash
           # 2回連続で同じstoryを再生しないためのチェック機構
           loadData(callback) if typeof callback is 'function'
@@ -140,14 +145,14 @@ window.audio = (->
           prevStoryHash = data.metadata.hash
           $('#' + LOADING_IMG_ID).hide()
           callback() if typeof callback is 'function'
+      )
   )()
 
   $('#' + PLAY_BTN_ID).click ->
-    channelId = channelSelector.getId()
-    if channelId
-      setInterval (->
+    if channelSelector.getId()
+      setInterval((->
         loadData() unless executor.isFilled()
-      ), LOAD_INTERVAL_MILLIS
+      ), config.LOAD_INTERVAL_MILLIS)
       executor.exec()
     else
       alert('番組を選んで下さい')
