@@ -1,3 +1,12 @@
+config = Object.freeze(
+  LOAD_INTERVAL_MILLIS: 3000
+  QUEUE_SIZE: 3
+  WEBRIC_URL_MAX_LENGTH: 1000
+  READ_TEXT_MAX_LENGTH: 100
+  LINK_TEXT_MAX_SIZE: 50
+  AUDIO_CONTENT_TYPE: 'audio/mpeg'
+)
+
 window.video =
   ID: 'videoplayer'
   PLAYER_ID: 'mychannelVideoplayer'
@@ -16,17 +25,18 @@ window.video =
       video.onFinish = callback
       swfobject.embedSWF(targetUrl, id, width, height, flashVersion, null, null, params, atts)
 
+  onPlayerReady: ->
+    player = document.getElementById(video.PLAYER_ID)
+    player.addEventListener('onStateChange', 'video.onPlayerStateChange')
+    player.playVideo()
+
   onPlayerStateChange: (state) ->
     video.onFinish() if state is 0
 
-window.onYouTubePlayerReady = ->
-  player = document.getElementById(video.PLAYER_ID)
-  player.addEventListener('onStateChange', 'video.onPlayerStateChange')
-  player.playVideo()
+window.onYouTubePlayerReady = video.onPlayerReady
 
 window.linkDisplay = (->
   LINK_DISPLAY_ID = 'link_display'
-  LINK_TEXT_MAX_SIZE = 50
 
   add: (links) ->
     links.forEach (i) ->
@@ -36,7 +46,7 @@ window.linkDisplay = (->
         href: i
         target: '_blank'
       ).addClass('btn btn-link')
-      text = if i.length <= LINK_TEXT_MAX_SIZE then i else i.substring(0, LINK_TEXT_MAX_SIZE) + '...'
+      text = if i.length <= config.LINK_TEXT_MAX_SIZE then i else i.substring(0, config.LINK_TEXT_MAX_SIZE) + '...'
       a.text(text)
       $('#' + LINK_DISPLAY_ID).prepend(li.append(icon).append(a))
 )()
@@ -52,10 +62,9 @@ window.channelSelector = (->
 )()
 
 window.audio = (->
-  AUDIO_CONTENT_TYPE = 'audio/mpeg'
   audioElem = $('audio:first')
   audioObj = audioElem.get(0)
-  if typeof audioObj.canPlayType isnt 'function' or not audioObj.canPlayType(AUDIO_CONTENT_TYPE)
+  if typeof audioObj.canPlayType isnt 'function' or not audioObj.canPlayType(config.AUDIO_CONTENT_TYPE)
     audiojs.events.ready ->
       as = audiojs.createAll()
 
@@ -68,19 +77,34 @@ window.audio = (->
     )
 )()
 
-config = Object.create(null,
-  LOAD_INTERVAL_MILLIS:
-    value: 3000
-  QUEUE_SIZE:
-    value: 3
-  WEBRIC_URL_MAX_LENGTH:
-    value: 1000
-  READ_TEXT_MAX_LENGTH:
-    value: 100
-)
-
 (->
-  PLAY_BTN_ID = 'play_btn'
+  view =
+    loadingImage: (->
+      elem = $('#loadingimg')
+
+      show: ->
+        elem.show()
+      hide: ->
+        elem.hide()
+    )()
+
+    textDisplay: (->
+      elem = $('#textdisplay')
+
+      flip: (text) ->
+        elem.slideUp('fast').text(text).slideDown('fast')
+    )()
+
+    playBtn: (->
+      elem = $('#play_btn')
+
+      onClick: (callback) ->
+        elem.click ->
+          if channelSelector.getId()
+            callback()
+          else
+            alert('番組を選んで下さい')
+    )()
 
   renderer = (->
     TEXT_DISPLAY_ID = 'textdisplay'
@@ -89,11 +113,12 @@ config = Object.create(null,
       # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
       normalizedText = text.replace(/\./g, ' ')
       encodedText = encodeURIComponent(normalizedText)
-      encodeURIComponent(normalizedText.substring(0, config.READ_TEXT_MAX_LENGTH)) if encodedText.length > config.WEBRIC_URL_MAX_LENGTH
+      encodedText = encodeURIComponent(normalizedText.substring(0, config.READ_TEXT_MAX_LENGTH)) if encodedText.length > config.WEBRIC_URL_MAX_LENGTH
+      encodedText
 
     renderText: (target) ->
-      $('#' + TEXT_DISPLAY_ID).slideUp('fast').text(target.text).slideDown('fast')
-      audio.play( '/voices/' + encodeForRequest(target.text), ->
+      view.textDisplay.flip(target.text)
+      audio.play('/voices/' + encodeForRequest(target.text), ->
         executor.execNext()
       )
       linkDisplay.add(target.links) if target.links
@@ -101,13 +126,11 @@ config = Object.create(null,
     renderVideo: (target) ->
       $('#' + video.ID).slideDown()
       video.play(target.video[0].url, ->
-        # TODO ここでplayerを非表示にすると再生用の関数等も消えてしまう
-        # $('#' + video.ID).slideUp();
+        # ここでplayerを非表示にすると再生用の関数等も消えてしまうので出しっぱなしにする
         executor.execNext()
       )
   )()
 
-  # TODO このクロージャのあたりの名前がイマイチ
   executor = (->
     queue = []
 
@@ -131,11 +154,10 @@ config = Object.create(null,
   )()
 
   loadData = (->
-    LOADING_IMG_ID = 'loadingimg'
     prevStoryHash = null
 
     (callback) ->
-      $('#' + LOADING_IMG_ID).show()
+      view.loadingImage.show()
       $.get('/channels/' + channelSelector.getId(), (data) ->
         if data.metadata.hash is prevStoryHash
           # 2回連続で同じstoryを再生しないためのチェック機構
@@ -143,17 +165,15 @@ config = Object.create(null,
         else
           executor.push(data.contents)
           prevStoryHash = data.metadata.hash
-          $('#' + LOADING_IMG_ID).hide()
+          view.loadingImage.hide()
           callback() if typeof callback is 'function'
       )
   )()
 
-  $('#' + PLAY_BTN_ID).click ->
-    if channelSelector.getId()
-      setInterval((->
-        loadData() unless executor.isFilled()
-      ), config.LOAD_INTERVAL_MILLIS)
-      executor.exec()
-    else
-      alert('番組を選んで下さい')
+  view.playBtn.onClick(->
+    setInterval((->
+      loadData() unless executor.isFilled()
+    ), config.LOAD_INTERVAL_MILLIS)
+    executor.exec()
+  )
 )()
