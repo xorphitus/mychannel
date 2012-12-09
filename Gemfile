@@ -3,23 +3,19 @@ source 'https://rubygems.org'
 gem 'rails', '3.2.7'
 
 # test
-group :test do
+group :development, :test do
   gem 'rspec-rails', '~> 2.0'
   gem 'fabrication'
   gem 'webmock'
-  gem 'jasmine'
-end
-
-group :development do
   gem 'spork'
   gem 'simplecov'
+  # CoffeeScript
+  gem 'jasmine'
+  gem 'jasminerice'
   # guard - ruby
   gem 'rb-fsevent'
   gem 'guard-spork'
   gem 'guard-rspec'
-  # guard - coffee
-  gem 'guard-coffeescript'
-  gem 'guard-livereload'
   # notify
   gem 'libnotify' if /linux/ =~ RUBY_PLATFORM
   gem 'rb-inotify' if /linux/ =~ RUBY_PLATFORM
