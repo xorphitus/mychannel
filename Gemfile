@@ -47,7 +47,7 @@ group :assets do
 end
 
 gem 'jquery-rails'
-gem 'twitter-bootstrap-rails'
+gem 'twitter-bootstrap-rails', '2.1.3'
 
 # utils
 gem 'rails_config'

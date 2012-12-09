@@ -14,11 +14,10 @@ config = Object.freeze(
   videoPlayer: (->
     PLAYER_ID = 'mychannelVideoplayer'
     onFinish = null
-
-    elem = $('#videoplayer')
+    selector = '#videoplayer'
 
     show: ->
-      elem.slideDown()
+      $(selector).slideDown()
 
     play: (url, callback) ->
       player = document.getElementById(PLAYER_ID)
@@ -41,8 +40,8 @@ config = Object.freeze(
   )()
 
   audioPlayer: (->
-    elem = $('audio:first')
-    audioObj = elem.get(0)
+    selector = 'audio:first'
+    audioObj = $(selector).get(0)
     if audioObj
       if typeof audioObj.canPlayType isnt 'function' or not audioObj.canPlayType(config.AUDIO_CONTENT_TYPE)
         audiojs.events.ready ->
@@ -50,14 +49,14 @@ config = Object.freeze(
         alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも')
 
     play: (src, callback) ->
-      elem.attr('src', src).bind('ended', ->
-        elem.unbind('ended')
+      $(selector).attr('src', src).bind('ended', ->
+        $(selector).unbind('ended')
         callback()
       )
   )()
 
   linkDisplay: (->
-    elem = $('#link_display')
+    selector = '#link_display'
 
     add: (links) ->
       links.forEach (i) ->
@@ -69,38 +68,39 @@ config = Object.freeze(
         ).addClass('btn btn-link')
         text = if i.length <= config.LINK_TEXT_MAX_SIZE then i else i.substring(0, config.LINK_TEXT_MAX_SIZE) + '...'
         a.text(text)
-        elem.prepend(li.append(icon).append(a))
+        $(selector).prepend(li.append(icon).append(a))
   )()
 
   channelSelector: (->
-    elem = $('#channel_selector')
-    elem.fadeIn() if elem.find('option').size() > 1
+    selector = '#channel_selector'
+
+    $(selector).fadeIn() if $(selector).find('option').size() > 1
 
     getId: ->
-      elem.val()
+      $(selector).val()
   )()
 
   loadingImage: (->
-    elem = $('#loadingimg')
+    selector = '#loadingimg'
 
     show: ->
-      elem.show()
+      $(selector).show()
     hide: ->
-      elem.hide()
+      $(selector).hide()
   )()
 
   textDisplay: (->
-    elem = $('#textdisplay')
+    selector = '#textdisplay'
 
     flip: (text) ->
-      elem.slideUp('fast').text(text).slideDown('fast')
+      $(selector).slideUp('fast').text(text).slideDown('fast')
   )()
 
   playBtn: (->
-    elem = $('#play_btn')
+    selector = '#play_btn'
 
     onClick: (callback) ->
-      elem.click(->
+      $(selector).click(->
         if view.channelSelector.getId()
           callback()
         else
@@ -110,7 +110,7 @@ config = Object.freeze(
 
 @onYouTubePlayerReady = view.videoPlayer.onReady
 
-renderer = (->
+@renderer = (->
   encodeForRequest = (text) ->
     # . が含まれるとWEBrickがrouting errorを起こす場合があるようなので回避
     normalizedText = text.replace(/\./g, ' ')
@@ -121,7 +121,7 @@ renderer = (->
   renderText: (target) ->
     view.textDisplay.flip(target.text)
     view.audioPlayer.play('/voices/' + encodeForRequest(target.text), ->
-      executor.execNext()
+      executor.exec()
     )
     view.linkDisplay.add(target.links) if target.links
 
@@ -129,24 +129,38 @@ renderer = (->
     view.videoPlayer.show()
     view.videoPlayer.play(target.video[0].url, ->
       # ここでplayerを非表示にすると再生用の関数等も消えてしまうので出しっぱなしにする
-      executor.execNext()
+      executor.exec()
     )
 )()
 
-executor = (->
+@executor = (->
   queue = []
+  prevStoryHash = null
+
+  loadData: (callback) ->
+    view.loadingImage.show()
+    $.get('/channels/' + view.channelSelector.getId(), (data) ->
+      if data.metadata.hash is prevStoryHash
+        # 2回連続で同じstoryを再生しないためのチェック機構
+        executor.loadData(callback) if typeof callback is 'function'
+      else
+        executor.push(data.contents)
+        prevStoryHash = data.metadata.hash
+        view.loadingImage.hide()
+        callback() if typeof callback is 'function'
+    )
 
   exec: ->
-    if queue.length > 0 then executor.execNext() else loadData(executor.exec)
-
-  execNext: ->
-    target = queue.shift()
-    if target.text
-      renderer.renderText(target)
-    else if target.video
-      renderer.renderVideo(target)
+    if queue.length > 0
+      target = queue.shift()
+      if target.text
+        renderer.renderText(target)
+      else if target.video
+        renderer.renderVideo(target)
+      else
+        executor.exec()
     else
-      executor.execNext()
+      executor.loadData(executor.exec)
 
   push: (dataArray) ->
     queue = queue.concat(dataArray)
@@ -155,26 +169,9 @@ executor = (->
     queue.length >= config.QUEUE_SIZE
 )()
 
-loadData = (->
-  prevStoryHash = null
-
-  (callback) ->
-    view.loadingImage.show()
-    $.get('/channels/' + view.channelSelector.getId(), (data) ->
-      if data.metadata.hash is prevStoryHash
-        # 2回連続で同じstoryを再生しないためのチェック機構
-        loadData(callback) if typeof callback is 'function'
-      else
-        executor.push(data.contents)
-        prevStoryHash = data.metadata.hash
-        view.loadingImage.hide()
-        callback() if typeof callback is 'function'
-    )
-)()
-
 view.playBtn.onClick(->
   setInterval((->
-    loadData() unless executor.isFilled()
+    executor.loadData() unless executor.isFilled()
   ), config.LOAD_INTERVAL_MILLIS)
   executor.exec()
 )
