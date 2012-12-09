@@ -11,8 +11,8 @@ describe 'linkDisplay', ->
       a = $('<a href="' + links[0] + '" target="_blank">')
         .addClass('btn btn-link').text(links[0])
       expected = $('<div>').append(li.append(icon).append(a)).html()
-      linkDisplay.add links
-      expect($(linkDisplayExpr)).toHaveHtml expected
+      view.linkDisplay.add(links)
+      expect($(linkDisplayExpr)).toHaveHtml(expected)
 
     it 'adds 2 links to a link display area', ->
       links = ['http://foo.com/', 'http://bar.jp/']
@@ -28,8 +28,8 @@ describe 'linkDisplay', ->
       li0.append(icon0).append a0
       li1.append(icon1).append a1
       expected = $('<div>').prepend(li0).prepend(li1).html()
-      linkDisplay.add links
-      expect($(linkDisplayExpr)).toHaveHtml expected
+      view.linkDisplay.add(links)
+      expect($(linkDisplayExpr)).toHaveHtml(expected)
 
     it 'shortens a link text which has a too long charactors', ->
       links = ['http://foo.com/01234567890123456789012345678901234567890123456789.html']
@@ -38,8 +38,8 @@ describe 'linkDisplay', ->
       a = $('<a href="' + links[0] + '" target="_blank">')
         .addClass('btn btn-link').text(links[0].substring(0, 50) + '...')
       expected = $('<div>').append(li.append(icon).append(a)).html()
-      linkDisplay.add links
-      expect($(linkDisplayExpr)).toHaveHtml expected
+      view.linkDisplay.add(links)
+      expect($(linkDisplayExpr)).toHaveHtml(expected)
 
 describe 'channelSelector', ->
   channelSelectorExpr = '#channel_selector'

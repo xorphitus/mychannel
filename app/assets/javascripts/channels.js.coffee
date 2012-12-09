@@ -43,10 +43,11 @@ config = Object.freeze(
   audioPlayer: (->
     elem = $('audio:first')
     audioObj = elem.get(0)
-    if typeof audioObj['canPlayType'] isnt 'function' or not audioObj.canPlayType(config.AUDIO_CONTENT_TYPE)
-      audiojs.events.ready ->
-        as = audiojs.createAll()
-      alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも')
+    if audioObj
+      if typeof audioObj.canPlayType isnt 'function' or not audioObj.canPlayType(config.AUDIO_CONTENT_TYPE)
+        audiojs.events.ready ->
+          as = audiojs.createAll()
+        alert('ごめんなさい. 現在お使いのブラウザでは視聴できないです. もう少々お待ち下さい. Google Chromeだといいかも')
 
     play: (src, callback) ->
       elem.attr('src', src).bind('ended', ->
@@ -107,7 +108,7 @@ config = Object.freeze(
       )
   )()
 
-@onYouTubePlayerReady = videoPlayer.onReady
+@onYouTubePlayerReady = view.videoPlayer.onReady
 
 renderer = (->
   encodeForRequest = (text) ->

@@ -3,15 +3,19 @@ source 'https://rubygems.org'
 gem 'rails', '3.2.7'
 
 # test
-group :development, :test do
+group :test do
   gem 'rspec-rails', '~> 2.0'
   gem 'fabrication'
   gem 'webmock'
+end
+
+group :development, :test do
   gem 'spork'
   gem 'simplecov'
   # CoffeeScript
   gem 'jasmine'
   gem 'jasminerice'
+  gem 'guard-jasmine'
   # guard - ruby
   gem 'rb-fsevent'
   gem 'guard-spork'
