@@ -1,3 +1,4 @@
 window.signIn = ->
-  $.post '/session', null, ->
+  $.post('/session', null, ->
     location.href = '/'
+  )
