@@ -16,11 +16,10 @@ config = Object.freeze(
     onFinish = null
     selector = '#videoplayer'
 
-    show: ->
+    play: (url, callback) ->
       $(selector).slideDown()
 
-    play: (url, callback) ->
-      player = document.getElementById(PLAYER_ID)
+      player = $('#' + PLAYER_ID).get(0)
       targetUrl = url + '?enablejsapi=1&playerapiid=ytplayer'
       if player
         player.loadVideoByUrl(targetUrl)
@@ -32,11 +31,12 @@ config = Object.freeze(
         swfobject.embedSWF(targetUrl, id, config.VIDEO_WIDTH, config.VIDEO_HEIGHT, config.VIDEO_FLASH_VERSION, null, null, params, atts)
 
     onReady: ->
-      player = document.getElementById(PLAYER_ID)
-      player.addEventListener('onStateChange', (state) ->
-        onFinish() if state is 0
-      )
+      player = $('#' + PLAYER_ID).get(0)
+      player.addEventListener('onStateChange', 'view.videoPlayer.onStateChange')
       player.playVideo()
+
+    onStateChange: (state) ->
+      onFinish() if state is 0
   )()
 
   audioPlayer: (->
@@ -50,7 +50,7 @@ config = Object.freeze(
 
     play: (src, callback) ->
       $(selector).attr('src', src).bind('ended', ->
-        $(selector).unbind('ended')
+        $(@).unbind('ended')
         callback()
       )
   )()
@@ -58,16 +58,18 @@ config = Object.freeze(
   linkDisplay: (->
     selector = '#link_display'
 
+    limitString = (str, maxLength) ->
+      if str.length <= maxLength then str else str.substring(0, maxLength) + '...'
+
     add: (links) ->
-      links.forEach (i) ->
+      links.forEach (link) ->
         li = $('<li>')
         icon = $('<i>').addClass('icon-hand-right')
         a = $('<a>').attr(
-          href: i
+          href: link
           target: '_blank'
         ).addClass('btn btn-link')
-        text = if i.length <= config.LINK_TEXT_MAX_SIZE then i else i.substring(0, config.LINK_TEXT_MAX_SIZE) + '...'
-        a.text(text)
+        a.text(limitString(link, config.LINK_TEXT_MAX_SIZE))
         $(selector).prepend(li.append(icon).append(a))
   )()
 
@@ -85,6 +87,7 @@ config = Object.freeze(
 
     show: ->
       $(selector).show()
+
     hide: ->
       $(selector).hide()
   )()
@@ -96,7 +99,7 @@ config = Object.freeze(
       $(selector).slideUp('fast').text(text).slideDown('fast')
   )()
 
-  playBtn: (->
+  playButton: (->
     selector = '#play_btn'
 
     onClick: (callback) ->
@@ -126,7 +129,6 @@ config = Object.freeze(
     view.linkDisplay.add(target.links) if target.links
 
   renderVideo: (target) ->
-    view.videoPlayer.show()
     view.videoPlayer.play(target.video[0].url, ->
       # ここでplayerを非表示にすると再生用の関数等も消えてしまうので出しっぱなしにする
       executor.exec()
@@ -138,17 +140,18 @@ config = Object.freeze(
   prevStoryHash = null
 
   loadData: (callback) ->
-    view.loadingImage.show()
-    $.get('/channels/' + view.channelSelector.getId(), (data) ->
-      if data.metadata.hash is prevStoryHash
-        # 2回連続で同じstoryを再生しないためのチェック機構
-        executor.loadData(callback) if typeof callback is 'function'
-      else
-        executor.push(data.contents)
-        prevStoryHash = data.metadata.hash
-        view.loadingImage.hide()
-        callback() if typeof callback is 'function'
-    )
+    unless executor.isFilled()
+      view.loadingImage.show()
+      $.get('/channels/' + view.channelSelector.getId(), (data) ->
+        if data.metadata.hash is prevStoryHash
+          # 2回連続で同じstoryを再生しないためのチェック機構
+          executor.loadData(callback) if typeof callback is 'function'
+        else
+          executor.push(data.contents)
+          prevStoryHash = data.metadata.hash
+          view.loadingImage.hide()
+          callback() if typeof callback is 'function'
+      )
 
   exec: ->
     if queue.length > 0
@@ -169,9 +172,9 @@ config = Object.freeze(
     queue.length >= config.QUEUE_SIZE
 )()
 
-view.playBtn.onClick(->
+view.playButton.onClick(->
   setInterval((->
-    executor.loadData() unless executor.isFilled()
+    executor.loadData()
   ), config.LOAD_INTERVAL_MILLIS)
   executor.exec()
 )
