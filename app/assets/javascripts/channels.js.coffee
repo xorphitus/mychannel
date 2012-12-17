@@ -1,6 +1,7 @@
 config = Object.freeze(
   LOAD_INTERVAL_MILLIS: 3000
   QUEUE_SIZE: 3
+  MAX_FAIL_COUNT: 3
   WEBRIC_URL_MAX_SIZE: 1000
   READ_TEXT_MAX_SIZE: 100
   LINK_TEXT_MAX_SIZE: 50
@@ -138,19 +139,30 @@ config = Object.freeze(
 @executor = (->
   queue = []
   prevStoryHash = null
+  timerId = null
+  failCount = 0
 
   loadData: (callback) ->
     unless executor.isFilled()
       view.loadingImage.show()
-      $.get('/channels/' + view.channelSelector.getId(), (data) ->
-        if data.metadata.hash is prevStoryHash
-          # 2回連続で同じstoryを再生しないためのチェック機構
-          executor.loadData(callback) if typeof callback is 'function'
-        else
-          executor.push(data.contents)
-          prevStoryHash = data.metadata.hash
+      $.ajax(
+        url: '/channels/' + view.channelSelector.getId()
+        dataType: 'json'
+        success: (data) ->
+          failCount = 0
+          if data.metadata.hash is prevStoryHash
+            # 2回連続で同じstoryを再生しないためのチェック機構
+            executor.loadData(callback) if typeof callback is 'function'
+          else
+            executor.push(data.contents)
+            prevStoryHash = data.metadata.hash
+            callback() if typeof callback is 'function'
+        error: ->
+          if ++failCount >= config.MAX_FAIL_COUNT
+            executor.stopBackgroundLoad()
+            alert('エラーが起きました. また後ほどアクセスしてください. ご迷惑をおかけします.')
+        complete: ->
           view.loadingImage.hide()
-          callback() if typeof callback is 'function'
       )
 
   exec: ->
@@ -170,11 +182,17 @@ config = Object.freeze(
 
   isFilled: ->
     queue.length >= config.QUEUE_SIZE
+
+  startBackgroundLoad: ->
+    timerId = setInterval((->
+      executor.loadData()
+    ), config.LOAD_INTERVAL_MILLIS)
+
+  stopBackgroundLoad: ->
+    clearTimeout(timerId) if timerId
 )()
 
 view.playButton.onClick(->
-  setInterval((->
-    executor.loadData()
-  ), config.LOAD_INTERVAL_MILLIS)
+  executor.startBackgroundLoad()
   executor.exec()
 )

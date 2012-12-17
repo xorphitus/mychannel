@@ -105,7 +105,6 @@ describe 'executor', ->
   beforeEach(->
     spyOn(renderer, 'renderText')
     spyOn(renderer, 'renderVideo')
-    spyOn(executor, 'loadData')
   )
 
   it 'is not filled when it has no data', ->
@@ -115,16 +114,50 @@ describe 'executor', ->
     executor.push([1, 2, 3])
     expect(executor.isFilled()).toBeTruthy()
 
-  it 'calles "loadData" when it has no data', ->
+  it 'calls "loadData" when it has no data', ->
+    spyOn(executor, 'loadData')
     executor.exec()
     expect(executor.loadData).toHaveBeenCalled()
 
-  it 'calles "renderText" when it has data about texts ', ->
+  it 'calls "renderText" when it has data about texts ', ->
     executor.push([text: 'TEXT'])
     executor.exec()
     expect(renderer.renderText).toHaveBeenCalled()
 
-  it 'calles "renderVideo" when it has data about videos ', ->
+  it 'calls "renderVideo" when it has data about videos ', ->
     executor.push([video: 'VIDEO'])
     executor.exec()
     expect(renderer.renderVideo).toHaveBeenCalled()
+
+  it 'starts and stops "loadData" as a background task', ->
+    spyOn(executor, 'loadData')
+    jasmine.Clock.useMock()
+    spyOn(window, 'clearTimeout')
+
+    executor.startBackgroundLoad()
+    expect(executor.loadData).not.toHaveBeenCalled()
+
+    jasmine.Clock.tick(3000)
+    expect(executor.loadData).toHaveBeenCalled()
+
+    executor.stopBackgroundLoad()
+    expect(clearTimeout).toHaveBeenCalled()
+
+  it 'does not call "stopBackgroundLoad" when faild to load data less than 3 times', ->
+    spyOn(executor, 'stopBackgroundLoad')
+    spyOn($, 'ajax').andCallFake((options) ->
+      options.error()
+    )
+    executor.loadData()
+    executor.loadData()
+    expect(executor.stopBackgroundLoad).not.toHaveBeenCalled()
+
+  it 'calls "stopBackgroundLoad" when faild to load data more than 2 times', ->
+    spyOn(executor, 'stopBackgroundLoad')
+    spyOn($, 'ajax').andCallFake((options) ->
+      options.error()
+    )
+    executor.loadData()
+    executor.loadData()
+    executor.loadData()
+    expect(executor.stopBackgroundLoad).toHaveBeenCalled()
