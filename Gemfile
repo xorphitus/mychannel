@@ -31,7 +31,7 @@ group :development do
   gem 'sqlite3'
 end
 group :production, :test do
-  gem 'mysql2'
+  gem 'pg'
 end
 
 gem 'dalli'
