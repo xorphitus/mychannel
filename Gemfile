@@ -59,3 +59,6 @@ gem 'youtube_search'
 gem 'yacan'
 gem 'simple-rss'
 gem 'nokogiri'
+
+# etc
+gem 'newrelic_rpm'
