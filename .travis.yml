@@ -2,7 +2,7 @@ language: ruby
 rvm:
   - 1.9.3
 env:
-  - DB=mysql
+  - DB=postgres
 before_script:
   - "rake db:migrate:reset RAILS_ENV=test"
 script:
